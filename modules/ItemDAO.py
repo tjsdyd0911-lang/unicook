@@ -44,22 +44,28 @@ class ItemDAO :
         print(total)
         return total, item
     
-    def View(self, code) :
+    def View(self, code, hit_up=True) :
         """
-        게시물 정보 조회
+        게시물 정보 조회 및 조회수 증가
         """
         with DBManager() as db :
+            
+            # 2. 조회수 증가(Update) 쿼리 실행
+            if hit_up:
+                sql_up = f"update item set view = view + 1 where code = {code}"
+                db.RunSQL(sql_up) # 조회수 업데이트
+            
             sql  = "select * from item "
             sql += f"where code = {code} "
-            count = db.select(sql)
+            count = db.Select(sql)
             vo = ItemVO()
             if count > 0 :
-                vo.no = db.GetValue(0, "code")
+                vo.code = db.GetValue(0, "code")
                 vo.image       = db.GetValue(0, "image")
                 vo.category_id = db.GetValue(0, "category_id")
                 vo.category    = db.GetValue(0, "category")
                 vo.item_name   = db.GetValue(0, "item_name")
-                vo.price       = db.GetValue(0, "price")
+                vo.price       = f"{db.GetValue(0, 'price'):,}원"
                 vo.weight      = db.GetValue(0, "weight")
                 vo.view        = db.GetValue(0, "view")
                 vo.stock       = db.GetValue(0, "stock")

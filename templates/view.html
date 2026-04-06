@@ -6,26 +6,24 @@
                 <!-- 좌측: 상품 이미지 (둥근 모서리 적용) -->
                 <div class="col-md-6">
                     <div class="product-img-box">
-                        <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/989d0b2f-63fb-457f-a33d-e5b82b39ccf2.jpg" 
-                             class="img-fluid rounded-4 shadow-sm" alt="새우볶음밥 이미지">
+                        <img src="{{item.image}}" class="img-fluid rounded-4 shadow-sm">
                     </div>
                 </div>
-                
                 <!-- 우측: 상품 상세 정보 -->
                 <div class="col-md-6">
                     <!-- 1. 카테고리 (작고 연하게) -->
                     <div class="product-category text-muted mb-2" style="font-size: 0.9rem;">
-                        도시락/밥류 / 한식
+                        {{item.category}}
                     </div>
                 
                     <!-- 2. 상품명 (검정색, 굵게) -->
                     <h2 class="product-title fw-bold text-dark mb-3">
-                        [차려낸] 새우볶음밥
+                        {{item.item_name}}
                     </h2>
         
                     <!-- 3. 가격 (오렌지색 포인트) -->
                     <div class="product-price-large fw-bold mb-4" style="color: #fa622f; font-size: 2rem;">
-                        9,800<small style="font-size: 1.2rem; margin-left: 2px;">원</small>
+                        {{item.price}}
                     </div>
         
                     <!-- 구분선 -->
@@ -38,12 +36,8 @@
                             <span class="info-value text-secondary">샛별배송 / 택배배송</span>
                         </div>
                         <div class="d-flex align-items-center mb-3">
-                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-scale-balanced text-muted me-2"></i>중량/용량:</span>
-                            <span class="info-value text-secondary">1팩 (4개입)</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>판매단위:</span>
-                            <span class="info-value text-secondary">1팩</span>
+                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-scale-balanced text-muted me-2"></i>판매단위(중량):</span>
+                            <span class="info-value text-secondary">{{item.weight}}</span>
                         </div>
                     </div>
                     

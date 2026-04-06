@@ -42,13 +42,15 @@ def loginok() :
 def logout() :
     session["login"] = None     
     return redirect("/")
+
+# 상세페이지
 @app.route("/view.do")
 def view() :
     code = request.args.get("code","")
     if code == "":
         return redirect("/")
     dao = ItemDAO()
-    item = dao.View(code,True)
+    item = dao.View(code)
     return render_template("view.html", item=item)
 
 @app.route("/cart.do")

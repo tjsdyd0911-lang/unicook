@@ -1,0 +1,30 @@
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <div class="modal-header border-0 px-0">
+                <h5 class="modal-title fw-bold text-center w-100">UNICOOK 로그인</h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-0">
+                <form id="login" name="login" method="post" action="loginok.do">
+                    <div class="mb-3">
+                        <div class="position-relative" style="max-width: 100%;"> 
+                            <select id="id" name="id" class="form-control rounded-pill p-3 border-light-sand">
+                                <option value="user_001">user_001</option>
+                                <option value="user_002">user_002</option>
+                                <option value="user_003">user_003</option>
+                                <option value="user_004">user_004</option>
+                                <option value="user_005">user_005</option>
+                            </select>
+                            <i class="fas fa-chevron-down position-absolute" style="right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8B4513;"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" id="pw" name="pw" value="unicook" class="form-control rounded-pill p-3 border-light-sand">
+                    </div>
+                    <button type="button" id="btnLogin" class="btn btn-sand w-100 py-3 mt-3 fw-bold">로그인</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

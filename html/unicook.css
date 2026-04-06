@@ -1,0 +1,316 @@
+
+/* ==========================================================================
+   1. 공통 변수 및 기본 설정 (Root & Base)
+   ========================================================================== */
+:root {
+    --bs-body-bg: #f5f2e8;     /* 전체 배경 (샌드베이지) */
+    --main-sand: #8b7355;      /* 포인트 브라운 */
+    --light-sand: #e6dfcc;     /* 경계선 및 보조 베이지 */
+    --card-bg: #ffffff;        /* 카드 배경 화이트 */
+    --product-blue: #003566;   /* 상품명 남색 */
+    --product-brown: #a37b52;  /* 가격 갈색 */
+}
+
+body { 
+    color: #4a453e; 
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+}
+
+a { text-decoration: none; color: inherit; }
+a:hover { color: var(--main-sand); }
+
+/* ==========================================================================
+   2. 헤더 및 네비게이션 (Navbar)
+   ========================================================================== */
+.navbar { 
+    background-color: #ffffff !important; 
+    border-bottom: 1px solid var(--light-sand); 
+}
+
+.search-container { 
+    max-width: 400px; 
+    width: 100%; 
+}
+
+/* ==========================================================================
+   3. 버튼 스타일 (Buttons)
+   ========================================================================== */
+/* 기본 샌드 버튼 */
+.btn-sand { 
+    background-color: var(--main-sand); 
+    color: white; 
+    border-radius: 10px; 
+    padding: 10px 25px; 
+    border: none; 
+    transition: 0.3s; 
+}
+.btn-sand:hover { background-color: #705e45; color: white; }
+
+.btn-buy { 
+    background-color: var(--main-sand); 
+    color: white; 
+    border-radius: 10px; 
+    padding: 10px 25px; 
+    border: none; 
+    transition: 0.3s; 
+}
+.btn-buy:hover { background-color: #705e45; color: white; }
+
+/* 둥근 형태의 샌드 버튼 (메인용) */
+.btn-sand.rounded-pill { border-radius: 50px; }
+
+/* 라인 형태의 샌드 버튼 */
+.btn-outline-sand { 
+    border: 2px solid var(--main-sand); 
+    color: var(--main-sand); 
+    border-radius: 10px; 
+    padding: 10px 25px; 
+    font-weight: bold; 
+    background: transparent;
+    transition: 0.3s;
+}
+.btn-outline-sand:hover { background-color: var(--main-sand); color: white; }
+
+/* 필터 버튼 (구매내역용) */
+.filter-btn { 
+    border: 1px solid var(--light-sand); 
+    background: white; 
+    color: #666; 
+    border-radius: 20px; 
+    padding: 5px 15px; 
+    font-size: 0.9rem; 
+    transition: 0.2s; 
+}
+.filter-btn.active, .filter-btn:hover { 
+    background: var(--main-sand); 
+    color: white; 
+    border-color: var(--main-sand); 
+}
+
+/* 수량 조절 버튼 (장바구니용) */
+.qty-btn { 
+    border: 1px solid var(--light-sand); 
+    background: white; 
+    width: 30px; 
+    height: 30px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    border-radius: 5px; 
+}
+
+/* ==========================================================================
+   4. 상품 카드 및 카테고리 (Product & Category)
+   ========================================================================== */
+/* 공통 상품 카드 */
+.product-card {
+    background-color: transparent; 
+    border: none;
+    transition: 0.3s; 
+    width: 100%;
+}
+.product-card:hover { transform: translateY(-5px); }
+
+.product-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1.2;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 12px;
+}
+
+.product-name {
+    color: var(--product-blue);
+    font-size: 0.95rem;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.8em;
+}
+
+.product-price {
+    color: var(--product-brown);
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* 카테고리 아이템 (메인) */
+.cat-item { 
+    background: white; border: 1px solid var(--light-sand); 
+    padding: 12px; text-align: center; cursor: pointer; transition: 0.2s;
+    font-size: 0.9rem;
+}
+.cat-item:hover { background-color: #fcfbf7; color: var(--main-sand); font-weight: bold; }
+
+/* 카테고리 태그 (상세) */
+.category-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: white;
+    padding: 5px 15px;
+    border-radius: 50px;
+    border: 1px solid var(--main-sand);
+    font-size: 0.95rem;
+    color: var(--main-sand);
+    font-weight: 500;
+}
+.category-tag span.sep { margin: 0 8px; color: #ccc; }
+
+/* 상세페이지 대형 이미지 박스 */
+.product-img-box {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.product-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 추천/스켈레톤 카드 (공통 보조) */
+.rec-card, .product-img-placeholder {
+    background-color: #eeeae0; border: 1px solid #cdc5b0;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    transition: 0.3s; cursor: pointer; color: #a39a85;
+}
+.rec-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+/* ==========================================================================
+   5. 장바구니 및 구매 정보 (Cart & Order)
+   ========================================================================== */
+.cart-card, .payment-summary, .filter-box { 
+    background: var(--card-bg); 
+    border: 1px solid var(--light-sand); 
+    border-radius: 15px; 
+    padding: 20px; 
+}
+
+.payment-summary { position: sticky; top: 100px; padding: 25px; }
+
+.form-check-input:checked { 
+    background-color: var(--main-sand); 
+    border-color: var(--main-sand); 
+}
+
+/* 주문 내역 카드 */
+.order-card { 
+    background: var(--card-bg); 
+    border: 1px solid var(--light-sand); 
+    border-radius: 15px; 
+    overflow: hidden; 
+    margin-bottom: 20px; 
+    transition: 0.3s; 
+}
+.order-card:hover { border-color: #cdc5b0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+.order-header { 
+    background-color: #fcfbf7; 
+    border-bottom: 1px solid var(--light-sand); 
+    padding: 15px 20px; 
+    display: flex; justify-content: space-between; align-items: center; 
+}
+
+.order-body { padding: 20px; }
+
+.product-img-small { 
+    width: 80px; height: 80px; 
+    background-color: #eeeae0; 
+    border-radius: 10px; 
+    display: flex; align-items: center; justify-content: center; 
+    color: #a39a85; flex-shrink: 0;
+}
+
+/* 원하는 픽셀 값이나 비율로 고정 */
+.custom-product-img {
+    max-width: 80px; /* 원하는 너비로 수정 */
+    height: auto;     /* 비율 유지 */
+    display: block;   /* 중앙 정렬이 필요할 경우 */
+    margin: 0 auto;   /* 중앙 정렬이 필요할 경우 */
+}
+
+/* ==========================================================================
+   6. 식단 분석 리포트 (Analysis Report)
+   ========================================================================== */
+/* 클릭 가능한 리포트 진입 배너 */
+.analysis-banner, .analysis-section {
+    background-color: white; 
+    border: 2px dashed var(--main-sand);
+    padding: 30px; 
+    border-radius: 15px; 
+    cursor: pointer;
+    transition: all 0.3s; 
+    color: var(--main-sand);
+    text-align: center;
+}
+.analysis-banner:hover, .analysis-section:hover { 
+    background-color: #f9f7f2; 
+    border-style: solid; 
+}
+
+/* 리포트 결과 상세 섹션 */
+.report-section { 
+    background-color: #fcfbf7; 
+    border: 1px solid var(--light-sand); 
+    border-radius: 20px; 
+    padding: 40px; 
+}
+
+.report-header h4 { color: #5a4b3b; font-weight: bold; margin-bottom: 5px; }
+.report-header p { color: #8a8174; font-size: 0.95rem; }
+
+/* 요약 카드 */
+.summary-card { 
+    background: white; border: 1px solid #eeece0; border-radius: 15px; 
+    padding: 20px; text-align: center; height: 100%; 
+}
+.summary-value { font-size: 2.2rem; font-weight: 800; color: #7a6b5a; display: block; line-height: 1.2; }
+.summary-label { font-size: 0.85rem; color: #9a9085; margin-top: 5px; display: block; }
+.summary-value.highlight { color: #839b7d; }      /* 긍정 지표 */
+.summary-value.highlight-sub { color: #d1b17d; }  /* 주의 지표 */
+
+/* 내부 콘텐츠 박스 */
+.inner-report-card { 
+    background: white; border: 1px solid #eeece0; border-radius: 15px; 
+    padding: 25px; height: 100%; 
+}
+.inner-title { 
+    font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; 
+    border-left: 4px solid var(--main-sand); padding-left: 10px; 
+}
+
+/* 프로그레스 바 스타일 */
+.prog-item { margin-bottom: 18px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; }
+.progress { height: 12px; border-radius: 10px; background-color: #f0ede5; }
+.bar-protein { background-color: #839b7d !important; }
+.bar-carb { background-color: #d1b17d !important; }
+.bar-fat { background-color: #9c846d !important; }
+.bar-fiber { background-color: #7b94b1 !important; }
+
+/* 리포트 테이블 */
+.report-table { font-size: 0.9rem; margin-bottom: 0; }
+.report-table thead th { font-weight: normal; color: #999; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.report-table td { padding: 12px 0; vertical-align: middle; border-bottom: 1px solid #f9f9f9; }
+
+.eval-badge { padding: 4px 12px; border-radius: 6px; color: white; font-size: 0.75rem; min-width: 50px; display: inline-block; text-align: center; }
+.bg-good { background-color: #4e8d64; }
+.bg-proper { background-color: #3b7dad; }
+.bg-caution { background-color: #d49a3d; }
+
+/* 추천 포인트 박스 */
+.recommend-box { 
+    background-color: #f9f8f3; border-radius: 12px; 
+    padding: 20px; height: 100%; border: 1px solid #f0eee0; 
+}
+.recommend-title { font-weight: bold; font-size: 1rem; color: #4e8d64; margin-bottom: 8px; display: flex; align-items: center; }
+.recommend-text { font-size: 0.9rem; color: #777; margin-bottom: 0; }
+
+/* ==========================================================================
+   7. 모달 및 기타 (Modal & Misc)
+   ========================================================================== */
+.modal-content { border-radius: 20px; border: none; background-color: #fcfbf7; }
+.modal-header { border-bottom: 1px solid var(--light-sand); }

@@ -1,0 +1,8 @@
+LOAD DATA LOCAL INFILE 'C:/Users/MYCOM/Desktop/프로젝트/데이터프레임 합치기/상품컬럼추가.csv'
+INTO TABLE item
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES
+(code, image, item_name, @price, weight, category, view, stock)
+SET price = CAST(REPLACE(REPLACE(@price, ',', ''), ' ', '') AS UNSIGNED);

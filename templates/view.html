@@ -1,0 +1,109 @@
+{% include 'include/head.html' %}
+  <main class="container">
+       <!-- 상품 상세 메인 카드 박스 -->
+        <div class="product-detail-container p-4 p-md-5 shadow-sm bg-white rounded-4 mb-5">
+            <div class="row g-5 align-items-center">
+                <!-- 좌측: 상품 이미지 (둥근 모서리 적용) -->
+                <div class="col-md-6">
+                    <div class="product-img-box">
+                        <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/989d0b2f-63fb-457f-a33d-e5b82b39ccf2.jpg" 
+                             class="img-fluid rounded-4 shadow-sm" alt="새우볶음밥 이미지">
+                    </div>
+                </div>
+                
+                <!-- 우측: 상품 상세 정보 -->
+                <div class="col-md-6">
+                    <!-- 1. 카테고리 (작고 연하게) -->
+                    <div class="product-category text-muted mb-2" style="font-size: 0.9rem;">
+                        도시락/밥류 / 한식
+                    </div>
+                
+                    <!-- 2. 상품명 (검정색, 굵게) -->
+                    <h2 class="product-title fw-bold text-dark mb-3">
+                        [차려낸] 새우볶음밥
+                    </h2>
+        
+                    <!-- 3. 가격 (오렌지색 포인트) -->
+                    <div class="product-price-large fw-bold mb-4" style="color: #fa622f; font-size: 2rem;">
+                        9,800<small style="font-size: 1.2rem; margin-left: 2px;">원</small>
+                    </div>
+        
+                    <!-- 구분선 -->
+                    <hr class="text-secondary opacity-25 mb-4">
+        
+                    <!-- 4. 상세 메타 정보 (아이콘 + 텍스트) -->
+                    <div class="product-info-list mb-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-truck text-danger me-2"></i>배송정보:</span>
+                            <span class="info-value text-secondary">샛별배송 / 택배배송</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-scale-balanced text-muted me-2"></i>중량/용량:</span>
+                            <span class="info-value text-secondary">1팩 (4개입)</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="info-label me-3 text-dark"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>판매단위:</span>
+                            <span class="info-value text-secondary">1팩</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. 버튼 영역 -->
+                    <div class="d-flex gap-3 mt-auto">
+                        <!-- 장바구니 버튼: 흰 배경 + 회색 테두리 -->
+                        <button class="btn btn-outline-secondary flex-grow-1 py-3 rounded-3 bg-white text-dark border-secondary border-opacity-25 shadow-none">
+                            <i class="fa-solid fa-cart-shopping me-2"></i>장바구니 담기
+                        </button>
+                        <!-- 구매하기 버튼: 갈색 배경 -->
+                        <button class="btn btn-sand flex-grow-1 py-3 rounded-3 fw-bold border-0 shadow-none" style="background-color: #8b7355; color: white;">
+                            <a href="purchase.do">바로 구매하기</a>
+                        </button>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [중간] 추천 섹션 -->
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
+                <h4 class="fw-bold mb-0">
+                    <span class="text-warning">★</span> 함께하면 더 맛있는 추천 음식
+                </h4>
+            </div>
+            <div class="row g-4 text-center">
+                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/637e7895-af69-4df5-b6d8-a46d253b5937.jpg"><div class="product-name">[부산 이가네] 이가네 떡볶이</div><div class="product-price">7,490원</div></div></a></div>
+                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/product/image/9b9f29f3-e4c2-476d-b797-95358008318f.jpg"><div class="product-name">[BBQ] 후라이드 치킨</div><div class="product-price">9,900원</div></div></a></div>
+                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/989d0b2f-63fb-457f-a33d-e5b82b39ccf2.jpg"><div class="product-name">[차려낸] 새우볶음밥 (4개입)</div><div class="product-price">9,800원</div></div></a></div>
+                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/a0e5af45-0c1a-4cc3-a793-95481b5b70e0.jpg"><div class="product-name">[온더고] 간편 미식 덮밥 도시락</div><div class="product-price">5,500원</div></div></a></div>
+                 
+            </div>
+        </section>
+
+
+        <!-- [하단] 분석 리포트 작성 부분 (클릭 시 팝업) -->
+        <section class="mb-5 pt-4">
+            <div class="analysis-section" onclick="ShowBunsuk('view')">
+                <i class="fa-solid fa-file-invoice-pie fs-1 mb-3"></i>
+                <h4 class="fw-bold">분석 리포트 작성 부분</h4>
+                <p class="mb-0 text-muted">이 상품이 내 식단 건강에 미치는 영향을 분석해 보세요 (클릭 시 확인)</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- [Modal 1] 로그인 팝업 (통일성 유지) -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="modal-header border-0"><h5 class="modal-title fw-bold">로그인</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body text-center py-4">
+                    <input type="text" class="form-control rounded-pill mb-3 p-3" placeholder="아이디">
+                    <input type="password" class="form-control rounded-pill mb-4 p-3" placeholder="비밀번호">
+                    <button class="btn btn-sand w-100 py-3 rounded-pill fw-bold">로그인하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

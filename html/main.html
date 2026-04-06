@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCook - Main</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="unicook.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand fw-black fs-3 text-uppercase" href="main.html" style="color: var(--main-sand); letter-spacing: -1px;">
+                <i class="fa-solid fa-utensils me-2"></i>UniCook
+            </a>
+
+            <div class="search-container mx-auto d-none d-md-block">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0 rounded-start-pill" placeholder="오늘 뭐 먹지?" aria-label="Search">
+                    <span class="input-group-text bg-white border-start-0 rounded-end-pill">
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-4">
+                <a href="cart.html" class="text-dark position-relative">
+                    <i class="fa-solid fa-cart-shopping fs-4"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
+                </a>
+                <button class="btn btn-buy px-4" onclick="document.location='purchase.html'">
+                    구매내역
+                </button>                
+                <button class="btn btn-sand px-4" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="fa-solid fa-user me-2"></i>로그인
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5">
+       
+        <!-- Section 1: 시간대별 추천 (CSV 데이터 적용) -->
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <h4 class="fw-bold mb-0"><i class="fa-regular fa-clock me-2"></i>지금 시간 추천 상품</h4>
+            </div>
+            <div class="row g-4">
+                <!-- 상품 1: 바질토마토치즈 샌드위치 -->
+                <div class="col-6 col-md-3">
+                    <a href="view.html">
+                        <div class="product-card">
+                            <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/956905_1.jpg" onerror="this.src='https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/608cceae-c9b8-4a82-9beb-71998a42bf0c.jpg'" alt="상품">
+                            <div class="product-name">[베키아에누보] 바질토마토치즈 치아바타 샌드위치 (3입)</div>
+                            <div class="product-price">12,980원</div>
+                        </div>
+                    </a>
+                </div>
+                <!-- 상품 2: 소금집 잠봉뵈르 -->
+                <div class="col-6 col-md-3">
+                    <a href="view.html">
+                        <div class="product-card">
+                            <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/79fc23c5-60b6-4c46-884b-31bb6893367b.jpg" alt="상품">
+                            <div class="product-name">[소금집] 잠봉뵈르 샌드위치</div>
+                            <div class="product-price">7,565원</div>
+                        </div>
+                    </a>
+                </div>
+                <!-- 상품 3: 임태훈 셰프의 짬뽕 -->
+                <div class="col-6 col-md-3">
+                    <a href="view.html">
+                        <div class="product-card">
+                            <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/29695334-43ca-4c77-ac00-440814b9160a.jpg" alt="상품">
+                            <div class="product-name">[도량] 철가방요리사 임태훈 셰프의 짬뽕 (2인분)</div>
+                            <div class="product-price">15,717원</div>
+                        </div>
+                    </a>
+                </div>
+                <!-- 상품 4: 최강록 셰프 미역우동 -->
+                <div class="col-6 col-md-3">
+                    <a href="view.html">
+                        <div class="product-card">
+                            <img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/1e96ce62-9370-4d3f-8cb0-b9cd29133a6a.jpg" alt="상품">
+                            <div class="product-name">[흑백요리사] 최강록셰프 미역우동 454g</div>
+                            <div class="product-price">7,980원</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 분석 리포트 배너 -->
+        <section class="my-5 pt-4">
+            <div class="analysis-banner text-center" data-bs-toggle="modal" data-bs-target="#analysisModal">
+                <i class="fa-solid fa-chart-line fs-1 mb-3"></i>
+                <h4 class="fw-bold">나의 식단 분석 리포트 확인하기</h4>
+                <p class="mb-0 opacity-75">클릭하여 회원님께 딱 맞는 맞춤 상품 리포트를 확인해 보세요.</p>
+            </div>
+        </section>
+
+         <div class="text-center mb-5">
+             <h2 class="fw-bold">간편식 <i class="fa-solid fa-circle shadow-sm mx-1" style="font-size: 0.4rem;"></i> 밀키트 <i class="fa-solid fa-circle shadow-sm mx-1" style="font-size: 0.4rem;"></i> 샐러드</h2>
+         </div>
+        
+         <div class="row g-1 mb-5">
+             <div class="col-6 col-md-4"><div class="cat-item fw-bold">전체보기</div></div>
+             <div class="col-6 col-md-4"><div class="cat-item">샐러드·샌드위치</div></div>            
+             <div class="col-6 col-md-4"><div class="cat-item">떡볶이·튀김·순대</div></div>
+             <div class="col-6 col-md-4"><div class="cat-item">밀키트</div></div>
+             <div class="col-6 col-md-4"><div class="cat-item">도시락·밥류</div></div>
+             <div class="col-6 col-md-4"><div class="cat-item">치킨·피자·핫도그·만두</div></div>           
+         </div>
+
+
+
+        <!-- Section 2: 메인 상품 리스트 (CSV 데이터 적용) -->
+        <section class="pb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0"><i class="fa-solid fa-heart me-2 text-danger"></i>전체 보기</h4>
+            </div>
+            <div class="row g-4">
+                <!-- 16개 추천 상품 리스트 -->
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/637e7895-af69-4df5-b6d8-a46d253b5937.jpg"><div class="product-name">[부산 이가네] 이가네 떡볶이</div><div class="product-price">7,490원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/product/image/9b9f29f3-e4c2-476d-b797-95358008318f.jpg"><div class="product-name">[BBQ] 후라이드 치킨</div><div class="product-price">9,900원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/989d0b2f-63fb-457f-a33d-e5b82b39ccf2.jpg"><div class="product-name">[차려낸] 새우볶음밥 (4개입)</div><div class="product-price">9,800원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/a0e5af45-0c1a-4cc3-a793-95481b5b70e0.jpg"><div class="product-name">[온더고] 간편 미식 덮밥 도시락</div><div class="product-price">5,500원</div></div></a></div>
+                
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/ebe35b67-a8f8-4f03-b674-46f4a4fd771e.jpg"><div class="product-name">[바르다 김선생] 시그니처 주먹밥</div><div class="product-price">7,990원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/3513324e-3c3c-45a4-84b7-294afb0a4593.jpg"><div class="product-name">[하코야] 차슈 돈코츠라멘</div><div class="product-price">12,510원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/product/image/6b5b8a11-d6fd-475b-a830-8f3313b3c6a7.jpg"><div class="product-name">[비비고] 왕교자 만두 대용량</div><div class="product-price">10,980원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/39b48630-0359-4f08-aea3-8193aea1fc52.jpg"><div class="product-name">[일상식탁] 부산식 얼큰 낙곱새</div><div class="product-price">14,950원</div></div></a></div>
+
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/8bb34b8f-d8b7-454e-aca6-a980252f7a51.jpg"><div class="product-name">[안유성 명장] 나가사키 짬뽕탕</div><div class="product-price">12,060원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/1e143634-65e2-40e9-bbc8-8580f1b0e084.jpg"><div class="product-name">[사리원] 소불고기 전골</div><div class="product-price">12,720원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/3969e6e6-8af2-442e-b12e-19584a4161a8.jpg"><div class="product-name">[툭툭누들타이] 쏨땀</div><div class="product-price">9,260원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/4cad475e-c4a4-4032-8f75-84f94366da78.jpg"><div class="product-name">[정지선의 티엔미미] 해물차우면</div><div class="product-price">8,910원</div></div></a></div>
+
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/product/image/dd1c0a05-ca1a-4c21-a712-54338f3dbbf2.jpg"><div class="product-name">[남향푸드또띠아] 간편 브리또 15종</div><div class="product-price">6,600원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/product/image/8ac2fba2-1973-485d-b6cb-e5804f9eb1b4.jpg"><div class="product-name">[제일맞게컬리] 육즙 왕교자 만두</div><div class="product-price">10,480원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/b5a8601f-c837-4d1f-bc7d-f3b3f5daefc2.jpg"><div class="product-name">[LITTLENECK] 리틀넥 스테이크 키트</div><div class="product-price">19,900원</div></div></a></div>
+                <div class="col-6 col-md-3"><a href="view.html"><div class="product-card"><img src="https://product-image.kurly.com/product/image/eecc936c-d450-4823-b333-c49be3dc126a.jpg"><div class="product-name">[조선호텔] 꿔바로우 450g</div><div class="product-price">9,800원</div></div></a></div>
+            </div>
+        </section>
+        
+        <!-- 분석 리포트 배너 -->
+        <section class="my-5 pt-4">
+            <div class="analysis-banner text-center" data-bs-toggle="modal" data-bs-target="#analysisModal">
+                <i class="fa-solid fa-chart-line fs-1 mb-3"></i>
+                <h4 class="fw-bold">나의 식단 분석 리포트 확인하기</h4>
+                <p class="mb-0 opacity-75">클릭하여 회원님께 딱 맞는 맞춤 상품 리포트를 확인해 보세요.</p>
+            </div>
+        </section>
+           
+    </main>
+
+    <!-- [Modal 1] 로그인 팝업 -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="modal-header border-0 px-0">
+                    <h5 class="modal-title fw-bold text-center w-100">UNICOOK 로그인</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-0">
+                    <form>
+                        <div class="mb-3">
+                            <div class="position-relative" style="max-width: 100%;"> 
+                                <select class="form-control rounded-pill p-3 border-light-sand">
+                                    <option>user_001</option>
+                                    <option>user_002</option>
+                                    <option>user_003</option>
+                                </select>
+                                <i class="fas fa-chevron-down position-absolute" style="right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8B4513;"></i>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control rounded-pill p-3 border-light-sand" placeholder="비밀번호">
+                        </div>
+                        <button type="submit" class="btn btn-sand w-100 py-3 mt-3 fw-bold">로그인</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [Modal 2] 분석 리포트 팝업 -->
+    <div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content p-4">
+                <div class="modal-header border-0 px-0">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>개인별 식단 분석 리포트</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-white rounded-3 p-4 mt-2 border">
+                    <div class="row align-items-center mb-4 text-center">
+                        <div class="col-md-6 text-start">
+                            <h6 class="fw-bold mb-3">지난 달 나의 주문 통계</h6>
+                            <p class="small text-muted mb-1">가장 많이 찾은 카테고리: <strong>#밀키트 #샌드위치</strong></p>
+                            <p class="small text-muted">평균 섭취 칼로리: <strong>약 1,150kcal / 끼</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fa-solid fa-chart-pie fa-5x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light rounded text-center mt-3">
+                        <p class="mb-0"><strong>UniCook AI 추천:</strong> 저녁에는 소화가 잘 되는 <span class="text-success fw-bold">단백질 샐러드</span> 어떠신가요?</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-0 mt-3">
+                    <button type="button" class="btn btn-sand px-5 py-2 mx-auto" data-bs-dismiss="modal">확인 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCook - Main</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="/static/js/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/unicook.js"></script>
+    <link rel="stylesheet" href="/static/css/unicook.css">
+</head>
+<body>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand fw-black fs-3 text-uppercase" href="/" style="color: var(--main-sand); letter-spacing: -1px;">
+            <i class="fa-solid fa-utensils me-2"></i>UniCook
+        </a>
+
+        <div class="search-container mx-auto d-none d-md-block">
+            <div class="input-group">
+                <input type="text" class="form-control border-end-0 rounded-start-pill" placeholder="오늘 뭐 먹지?" aria-label="Search">
+                <span class="input-group-text bg-white border-start-0 rounded-end-pill">
+                    <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                </span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+            <a href="cart.do" class="text-dark position-relative">
+                <i class="fa-solid fa-cart-shopping fs-4"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
+            </a>
+            <button class="btn btn-buy px-4" onclick="document.location='purchase.do'">
+                구매내역
+            </button>
+            {% if session["login"] is defined and session["login"] is not none %}
+                [ {{ session["login"].name }} ]님
+                <button class="btn btn-sand px-4" type="button" onclick="location.href='/logout.do'">
+                    <i class="fa-solid fa-user me-2"></i>로그아웃
+                </button>
+            {% else %}
+                <button class="btn btn-sand px-4" onclick="ShowLogin();">
+                    <i class="fa-solid fa-user me-2"></i>로그인
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+<!-- [Modal 1] 로그인 팝업 -->
+<div id="popupModal"></div>

@@ -34,7 +34,10 @@ class BuyDAO :
                 vo.category_id = int(db.GetValue(n, "category_id"))
                 
                 buy_list.append(vo)
-                
-        
         
         return buy_list
+    def Insert(self, id, code, qty) :
+        with DBManager() as db :
+            sql  = "insert into buy(id, code, qty, btime) "
+            sql += f"values('{id}', {code}, {qty}, now())"
+            return db.RunSQL(sql)

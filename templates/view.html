@@ -42,9 +42,9 @@
                     </div>
                     <!-- 수량 조절 -->
                     <div class="d-flex align-items-center gap-2 mb-5">
-                        <button class="qty-btn" onclick="QtyMinus();"><i class="fa-solid fa-minus fa-xs"></i></button>
+                        <button class="qty-btn" onclick="QtyMinus(this);"><i class="fa-solid fa-minus fa-xs"></i></button>
                         <span class="qtyCount px-2">1</span>
-                        <button class="qty-btn" onclick="QtyPlus();"><i class="fa-solid fa-plus fa-xs"></i></button>
+                        <button class="qty-btn" onclick="QtyPlus(this);"><i class="fa-solid fa-plus fa-xs"></i></button>
                     </div>
                     <!-- 5. 버튼 영역 -->
                     <div class="d-flex gap-3 mt-auto">
@@ -76,32 +76,6 @@
                  
             </div>
         </section>
-
-
-        <!-- [하단] 분석 리포트 작성 부분 (클릭 시 팝업) -->
-        <section class="mb-5 pt-4">
-            <div class="analysis-section" onclick="ShowBunsuk('view')">
-                <i class="fa-solid fa-file-invoice-pie fs-1 mb-3"></i>
-                <h4 class="fw-bold">분석 리포트 작성 부분</h4>
-                <p class="mb-0 text-muted">이 상품이 내 식단 건강에 미치는 영향을 분석해 보세요 (클릭 시 확인)</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- [Modal 1] 로그인 팝업 (통일성 유지) -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4">
-                <div class="modal-header border-0"><h5 class="modal-title fw-bold">로그인</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body text-center py-4">
-                    <input type="text" class="form-control rounded-pill mb-3 p-3" placeholder="아이디">
-                    <input type="password" class="form-control rounded-pill mb-4 p-3" placeholder="비밀번호">
-                    <button class="btn btn-sand w-100 py-3 rounded-pill fw-bold">로그인하기</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

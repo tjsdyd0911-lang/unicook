@@ -68,7 +68,7 @@
         <div class="d-flex align-items-center gap-4">
             <a href="cart.do" class="text-dark position-relative" id="cartBtn">
                 <i class="fa-solid fa-cart-shopping fs-4"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;"></span>
+                <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">{{cart.cnt}}</span>
             </a>
             {% if session["login"] is defined and session["login"] is not none %}
                 [ {{ session["login"].name }} ]님

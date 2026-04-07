@@ -1,3 +1,0 @@
-mysql -u unicook -p -h192.168.0.35 unicook
-
-mysql 서버 비밀번호: cook

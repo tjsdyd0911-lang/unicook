@@ -67,9 +67,6 @@
                 <i class="fa-solid fa-cart-shopping fs-4"></i>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;"></span>
             </a>
-            <button class="btn btn-buy px-4" id="purchaseBtn">
-                구매내역
-            </button>
             {% if session["login"] is defined and session["login"] is not none %}
                 [ {{ session["login"].name }} ]님
                 <button class="btn btn-sand px-4" type="button" onclick="location.href='/logout.do'">
@@ -79,7 +76,10 @@
                 <button class="btn btn-sand px-4" onclick="ShowLogin();">
                     <i class="fa-solid fa-user me-2"></i>로그인
                 </button>
-            {% endif %}
+            {% endif %}       
+            <button class="btn btn-buy px-4" id="purchaseBtn">
+                구매내역
+            </button>
         </div>
     </div>
 </nav>

@@ -77,6 +77,7 @@ def loginok() :
     pw = request.form["pw"]
     dao = UserDAO()
     vo = dao.Login(id,pw)
+    
     if vo == None :
         return "ERROR";
     else :

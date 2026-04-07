@@ -2,7 +2,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import redirect
-from flask import session
+from flask import session, jsonify
 from modules.UserVO  import UserVO
 from modules.UserDAO import UserDAO
 from modules.ItemVO  import ItemVO
@@ -11,7 +11,6 @@ from modules.ItemDAO import ItemDAO
 from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
 import math
-
 
 from modules.BuyVO  import BuyVO
 from modules.BuyDAO  import BuyDAO
@@ -64,6 +63,14 @@ def loginok() :
 def logout() :
     session["login"] = None
     return redirect("/")
+
+# 로그인 체크(/loginCheck.do)
+@app.route("/loginCheck.do")
+def login_check() : 
+    if session.get('login') :
+        return jsonify({"login" : True})
+    else :
+        return jsonify({"login" : False})
 
 # 상세페이지
 @app.route("/view.do")

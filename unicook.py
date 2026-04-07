@@ -7,10 +7,15 @@ from modules.UserVO  import UserVO
 from modules.UserDAO import UserDAO
 from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
+<<<<<<< HEAD
 from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
 import math
 
+=======
+from modules.BuyVO  import BuyVO
+from modules.BuyDAO  import BuyDAO
+>>>>>>> d8362a6 (purchase.html 수정)
 
 app = Flask(__name__)
 
@@ -95,8 +100,20 @@ def cartadd() :
         return "FAIL" # 저장 실패
 
 @app.route("/purchase.do")
-def purchase() :
-    return render_template("purchase.html")
+def purchase():
+   
+    # 1. 로그인 여부 확인
+    if "login" not in session or session["login"] is None:
+        return redirect("/login.do") # 슬래시(/)를 붙이는 것이 더 안전합니다.
+    
+    # 2. 세션에서 아이디 가져오기 (따옴표 "id" 확인!)
+    user_id = session["login"]["id"] 
+    
+    dao = BuyDAO()
+    buys = dao.GetList(user_id)
+
+    # 4. HTML에 전달
+    return render_template("purchase.html", buys=buys)
 
 @app.route("/bunsuk.do")
 def bunsuk_main() :

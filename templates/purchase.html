@@ -10,99 +10,120 @@
                 <button class="filter-btn">전체</button>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <input type="date" class="form-control form-control-sm border-light-sand">
+                <input type="date" class="form-control form-control-sm">
                 <span>~</span>
-                <input type="date" class="form-control form-control-sm border-light-sand">
+                <input type="date" class="form-control form-control-sm">
                 <button class="btn btn-sm btn-sand px-3">조회</button>
             </div>
         </div>
-        
-        <!-- 최근 주문 리스트 -->
-        <div class="order-card">
-            <div class="order-header">
-                <div><span class="fw-bold me-2">2023.11.05</span><span class="text-muted small">주문번호: 231105-001234</span></div>
-                <a href="#" class="text-decoration-none small text-muted">주문상세 <i class="fa-solid fa-chevron-right fa-xs"></i></a>
-            </div>
-            <div class="order-body d-flex align-items-center gap-3">
-                <div class="product-img"><i class="fa-solid fa-box-open opacity-50"></i></div>
-                <div>
-                    <span class="badge badge-sand bg-success mb-2">배송완료</span>
-                    <h6 class="fw-bold mb-1">소불고기 밀키트 (2인분) 외 2건</h6>
-                    <p class="text-muted small mb-0">34,500원 <span class="mx-1">|</span> 신용카드 결제</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="order-card">
-            <div class="order-header">
-                <div><span class="fw-bold me-2">2023.10.28</span><span class="text-muted small">주문번호: 231028-009876</span></div>
-                <a href="#" class="text-decoration-none small text-muted">주문상세 <i class="fa-solid fa-chevron-right fa-xs"></i></a>
-            </div>
-            <div class="order-body d-flex align-items-center gap-3">
-                <div class="product-img"><i class="fa-solid fa-bowl-food opacity-50"></i></div>
-                <div>
-                    <span class="badge bg-primary mb-2">배송중</span>
-                    <h6 class="fw-bold mb-1">닭가슴살 아보카도 샐러드 1주 정기배송</h6>
-                    <p class="text-muted small mb-0">42,000원 <span class="mx-1">|</span> 네이버페이</p>
-                </div>
-            </div>
-        </div>
-
+    
+  <!-- 최근 주문 리스트 -->
+{% if buys %}  
+   {% for buy in buys %}
+   
+       <div class="order-card mb-4">
+           <!-- 주문 헤더 (날짜, 주문번호, 상세링크) -->
+           <div class="order-header">
+               <div>
+                   <span class="fw-bold me-2">{{ buy.btime }}</span>
+                   <span class="text-muted small">주문번호: {{ buy.bno }}</span>
+               </div>
+               <a href="/order_detail.do?bno={{ buy.bno }}" class="text-decoration-none small text-muted">
+                   주문상세 <i class="fa-solid fa-chevron-right fa-xs"></i>
+               </a>
+           </div>
+           <!-- 주문 바디 (이미지, 정보, 가격) -->
+           <div class="order-body d-flex align-items-center gap-4">
+           
+               <!-- 상품 이미지 및 수량 배지 -->
+               <div class="position-relative">
+                   <img src="{{buy.image}}" class="custom-product-img rounded shadow-sm" 
+                        onerror="this.src='/static/img/no-image.png'" 
+                        style="width: 80px; height: 80px; object-fit: cover;">
+                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark opacity-75" style="font-size: 0.7rem;">
+                       {{ buy.qty }}
+                   </span>
+               </div>
+            
+               <!-- 상품 정보 및 결제금액 -->
+               <div class="flex-grow-1">
+                   <span class="badge bg-success mb-2" style="font-size: 0.7rem;">결제완료</span>
+                   <h6 class="fw-bold mb-1">{{ buy.item_name }}</h6>
+                   <p class="text-muted small mb-0">
+                       단가 {{ "{:,}".format(buy.price) }}원 <span class="mx-1">|</span> 
+                       <strong>총 결제금액 {{ "{:,}".format(buy.price * buy.qty) }}원</strong>
+                   </p>
+               </div>
+    
+               <!-- 재구매 버튼 (선택 사항) -->
+               <div>
+                   <button class="btn btn-outline-sand btn-sm px-3" style="font-size: 0.8rem;">재구매</button>
+               </div>
+           </div>
+       </div> <!-- .order-card 끝 -->
+   {% endfor %}
+{% else %}
+   <!-- 구매 내역이 없을 경우 출력되는 화면 -->
+   <div class="text-center py-5 border rounded bg-white shadow-sm mb-5">
+       <div class="mb-3">
+           <i class="fa-solid fa-cart-ghost fa-3x text-muted opacity-25"></i>
+       </div>
+       <h5 class="fw-bold text-muted">구매 내역이 없습니다.</h5>
+       <p class="text-muted small">UniCook의 맛있는 밀키트를 만나보세요!</p>
+       <a href="/" class="btn btn-sand btn-sm px-4 mt-2">쇼핑하러 가기</a>
+   </div>
+{% endif %}   
+ 
         <!-- [중요] 식단 분석 리포트 섹션 (그림 내용 그대로 구현) -->
-        <section class="report-section shadow-sm">
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div class="report-header">
-                    <h4><i class="fa-solid fa-chart-line me-2"></i>나의 식단 분석 리포트</h4>
-                    <p>최근 구매 내역을 바탕으로 식단 균형을 확인해 보세요.</p>
-                </div>
-                <span class="badge bg-white text-muted border px-2 py-1" style="font-size: 0.75rem;">AI 추천</span>
-            </div>
+       <section class="report-section shadow-sm">
+           <div class="d-flex justify-content-between align-items-start mb-4">
+               <div class="report-header">
+                   <h4><i class="fa-solid fa-chart-line me-2"></i>나의 식단 분석 리포트</h4>
+                   <p>최근 구매 내역을 바탕으로 분석한 {{session["login"]["name"]}}님의 식단 리포트입니다.</p>
+               </div>
+               <span class="badge bg-white text-muted border px-2 py-1" style="font-size: 0.75rem;">AI 추천</span>
+           </div>
 
-            <!-- 요약 3칸 박스 -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="summary-card">
-                        <span class="summary-value">82</span>
-                        <span class="summary-label">식단 균형 점수</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="summary-card">
-                        <span class="summary-value highlight">64%</span>
-                        <span class="summary-label">단백질 상품 비중</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="summary-card">
-                        <span class="summary-value highlight-sub">36%</span>
-                        <span class="summary-label">채소/샐러드 비중</span>
-                    </div>
-                </div>
-            </div>
+           <!-- 요약 3칸 박스 -->
+           <div class="row g-3 mb-4">
+               <div class="col-md-4">
+                   <div class="summary-card">
+                       <span class="summary-value">0</span>
+                       <span class="summary-label">식단 균형 점수</span>
+                   </div>
+               </div>
+               <div class="col-md-4">
+                   <div class="summary-card">
+                       <span class="summary-value highlight">0%</span>
+                       <span class="summary-label">단백질 상품 비중</span>
+                   </div>
+               </div>
+               <div class="col-md-4">
+                   <div class="summary-card">
+                       <span class="summary-value highlight-sub">0%</span>
+                       <span class="summary-label">채소/샐러드 비중</span>
 
-            <div class="row g-4 mb-4">
-                <!-- 왼쪽: 영양 비율 -->
-                <div class="col-lg-6">
-                    <div class="inner-report-card">
-                        <div class="inner-title">영양 비율</div>
-                        <div class="prog-item">
-                            <div class="prog-label"><span>단백질</span><span class="fw-bold">64%</span></div>
-                            <div class="progress"><div class="progress-bar bar-protein" style="width: 64%"></div></div>
-                        </div>
-                        <div class="prog-item">
-                            <div class="prog-label"><span>탄수화물</span><span class="fw-bold">22%</span></div>
-                            <div class="progress"><div class="progress-bar bar-carb" style="width: 22%"></div></div>
-                        </div>
-                        <div class="prog-item">
-                            <div class="prog-label"><span>지방</span><span class="fw-bold">14%</span></div>
-                            <div class="progress"><div class="progress-bar bar-fat" style="width: 14%"></div></div>
-                        </div>
-                        <div class="prog-item mb-0">
-                            <div class="prog-label"><span>식이섬유</span><span class="fw-bold">78%</span></div>
-                            <div class="progress"><div class="progress-bar bar-fiber" style="width: 78%"></div></div>
-                        </div>
-                    </div>
-                </div>
+             <div class="row g-4 mb-4">
+                 <!-- 왼쪽: 영양 비율 -->
+                 <div class="col-lg-6">
+                     <div class="inner-report-card">
+                         <div class="inner-title">영양 비율</div>
+                         <div class="prog-item">
+                             <div class="prog-label"><span>단백질</span><span class="fw-bold">0%</span></div>
+                             <div class="progress"><div class="progress-bar bar-protein" style="width: 0%"></div></div>
+                         </div>
+                         <div class="prog-item">
+                             <div class="prog-label"><span>탄수화물</span><span class="fw-bold">0%</span></div>
+                             <div class="progress"><div class="progress-bar bar-carb" style="width: 0%"></div></div>
+                         </div>
+                         <div class="prog-item">
+                             <div class="prog-label"><span>지방</span><span class="fw-bold">0%</span></div>
+                             <div class="progress"><div class="progress-bar bar-fat" style="width: 0%"></div></div>
+                         </div>
+                         <div class="prog-item mb-0">
+                             <div class="prog-label"><span>식이섬유</span><span class="fw-bold">0%</span></div>
+                             <div class="progress"><div class="progress-bar bar-fiber" style="width: 0%"></div></div>
+    
 
                 <!-- 오른쪽: 구매 패턴 분석 -->
                 <div class="col-lg-6">

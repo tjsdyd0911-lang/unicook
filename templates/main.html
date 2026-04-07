@@ -82,9 +82,9 @@
             <div class="row g-4">
                 <!-- 16개 추천 상품 리스트 -->
                 {% for item in items %}
-                <div class="col-6 col-md-3">
-                    <a href="/view.do?code={{ item.code }}"><div class="product-card"><img src="{{item.image}}"><div class="product-name">{{item.item_name}}</div><div class="product-price">{{item.price}}</div></div></a>
-                </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/view.do?code={{ item.code }}"><div class="product-card"><img src="{{item.image}}"><div class="product-name">{{item.item_name}}</div><div class="product-price">{{item.price}}</div></div></a>
+                    </div>
                 {% endfor %}
             </div>
         </section>

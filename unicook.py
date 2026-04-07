@@ -3,14 +3,11 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import session
-from modules.UserVO  import UserVO
+from flask import jsonify
 from modules.UserDAO import UserDAO
-from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
-from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
 import math
-
 
 app = Flask(__name__)
 
@@ -18,6 +15,7 @@ app.secret_key = "unicook"
 
 @app.route("/")
 def main() :
+    
     current_page = request.args.get('page', 1, type=int)
     category = request.args.get("category", "0")
     dao = ItemDAO()
@@ -72,27 +70,62 @@ def view() :
 
 @app.route("/cart.do")
 def cart() :
-    return render_template("cart.html")
+    
+    login_info = session.get("login")
+    id = login_info.get("id") if login_info else None
+    
+    dao = CartDAO()
+    cart_list = dao.GetList(id) if id else []
+    
+    return render_template("cart.html", cart_list=cart_list)
 
 # 장바구니 추가
 @app.route("/cartadd.do")
 def cartadd() :
     try :
         login_info = session.get("login")
+        if not login_info :
+            return jsonify({"result": "fail", "message": "로그인이 필요합니다."})
         id   = login_info.get("id")
         code = request.args.get("code")
         qty  = request.args.get("qty")
-        
-        
-        code = int(code)
-        qty  = int(qty)
     
         dao = CartDAO()
         
-        dao.CartAdd(id, code, qty)
-        return "OK"   # 저장 성공
-    except :
-        return "FAIL" # 저장 실패
+        dao.CartAdd(id, int(code), int(qty))
+        
+        # 최신 데이터 가져오기
+        cart_data = dao.GetList(id) if id else []
+        new_count = len(cart_data)
+        
+        return jsonify({"result": "success", "new_count": new_count})   # 저장 성공
+    except Exception as e :
+        print(f"Error: {e}")
+        return jsonify({"result": "fail"}) # 저장 실패
+
+# 장바구니 삭제
+@app.route("/cartdelete.do", methods=["POST"])
+def cartdelete() :
+    
+    data = request.get_json()
+    cnos = data.get("cnos")
+    print(f"받은 cnos 데이터: {cnos}")
+    if cnos :
+        dao = CartDAO()
+        dao.CartDelete(cnos)
+        
+        # 삭제 후 현재 세션 사용자의 최신 장바구니 개수를 다시 계산
+        login_info = session.get("login")
+        user_id = login_info.get("id") if login_info else None
+        
+        # 최신 데이터 가져오기
+        cart_data = dao.GetList(user_id) if user_id else []
+        new_count = len(cart_data)
+        
+        return jsonify({"result" : "success", "new_count": new_count})
+    else :
+        return jsonify({"result": "fail", "message": "No items selected"})
+    
 
 @app.route("/purchase.do")
 def purchase() :
@@ -103,8 +136,19 @@ def bunsuk_main() :
     target = request.args.get("target","main")
     return render_template("bunsuk.html",target = target)
     #return render_template(f"bunsuk_{target}.html",target = target)
-    
 
+# 로그인 시 장바구니에 담긴 상품 갯수 조회를 헤더에 항상 표시하기 위한 함수
+# @app.context_processor -> 공통 데이터 담당 (항상 표시해야될 데이터에 사용)
+@app.context_processor
+def cart_info() :
+    login_info = session.get("login")
+    id = login_info.get("id") if login_info else None
+    
+    cart_dao = CartDAO()
+    cart_data = cart_dao.GetList(id) if id else []
+    
+    return dict(cart={'cnt': len(cart_data)})
+    
 # main 함수
 if __name__ == "__main__" :
     app.run(port=8000)

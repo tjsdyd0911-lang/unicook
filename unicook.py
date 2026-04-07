@@ -7,15 +7,15 @@ from modules.UserVO  import UserVO
 from modules.UserDAO import UserDAO
 from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
-<<<<<<< HEAD
+
 from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
 import math
 
-=======
+
 from modules.BuyVO  import BuyVO
 from modules.BuyDAO  import BuyDAO
->>>>>>> d8362a6 (purchase.html 수정)
+
 
 app = Flask(__name__)
 

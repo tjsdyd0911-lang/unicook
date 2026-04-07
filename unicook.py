@@ -3,16 +3,10 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import session
-from modules.UserVO  import UserVO
 from modules.UserDAO import UserDAO
-from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
-<<<<<<< HEAD
 import math
-=======
-from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
->>>>>>> a62d1291601c18a4aad5e59b0ceb401ef62dd932
 
 app = Flask(__name__)
 
@@ -25,7 +19,7 @@ def main() :
     dao = ItemDAO()
     total, items = dao.GetList(current_page, category)
     
-    # 페이지 5개씩 구현
+    # 페이지 6개씩 구현
     total_pages = math.ceil(total / 16)
     block_size = 5
     start_page = ((current_page - 1) // block_size) * block_size + 1
@@ -61,6 +55,28 @@ def loginok() :
 def logout() :
     session["login"] = None
     return redirect("/")
+
+# 카테고리 (/category)
+@app.route("/category.do")
+def category() :
+    current_page = request.args.get('page', 1, type=int)
+    category = request.args.get("category", "0")
+    dao = ItemDAO()
+    total, items = dao.GetList(current_page, category)
+    
+    # 페이지 6개씩 구현
+    total_pages = math.ceil(total / 16)
+    block_size = 5
+    start_page = ((current_page - 1) // block_size) * block_size + 1
+    end_page = start_page + block_size
+    
+    if end_page > total_pages:
+        end_page = total_pages
+    return render_template("_category_partial.html", items        = items,
+                                                     total_pages  = total_pages,
+                                                     current_page = current_page,
+                                                     start_page   = start_page,
+                                                     end_page     = end_page)
 
 # 상세페이지
 @app.route("/view.do")

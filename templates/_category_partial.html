@@ -1,0 +1,43 @@
+<!-- Section 2: 메인 상품 리스트 (CSV 데이터 적용) -->
+<div id="category">
+    <section class="pb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0" >
+                <i class="fa-solid fa-heart me-2 text-danger"></i><span id="category-title">전체 보기</span>
+            </h4>
+        </div>
+        <div class="row g-4">
+            <!-- 16개 추천 상품 리스트 -->
+            {% for item in items %}
+            <div class="col-6 col-md-3">
+                <a href="/view.do?code={{ item.code }}">
+                    <div class="product-card">
+                        <img src="{{item.image}}">
+                        <div class="product-name">{{item.item_name}}</div>
+                        <div class="product-price">{{item.price}}</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- page -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if current_page > 1 %}
+          <li><a href="javascript:void(0)" onclick="changePage({{ current_page - 1 }})">&laquo; 이전</a></li>
+        {% endif %}
+        {% for page in range(start_page, end_page + 1) %}
+          <li>
+            <a href="javascript:void(0)" onclick="changePage({{ page }})" 
+               class="{{ 'active' if page == current_page else '' }}">{{ page }}
+            </a>
+          </li>
+        {% endfor %}
+        {% if current_page < total_pages %}
+          <li><a href="javascript:void(0)" onclick="changePage({{ current_page + 1 }})">다음 &raquo;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+</div>

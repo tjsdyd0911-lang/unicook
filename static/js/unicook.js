@@ -137,3 +137,51 @@ function QtyPlus()
     $(".qtyCount").empty();
     $(".qtyCount").text(count);
 }
+
+
+// 카테고리 목록부분
+let currentCategory = 0;
+let categoryTitle   = "";
+// 카테고리 선택 시
+function selectCategory(element)
+{
+    // 클릭 시 글자 굵게
+    $(".cat-item").removeClass('fw-bold');
+    $(element).addClass('fw-bold');
+    categoryTitle = $(element).text();
+    
+    currentCategory = $(element).data('value'); 
+    loadItems(currentCategory, 1);
+}
+
+// 페이지 번호 클릭 시
+function changePage(page) {
+    loadItems(currentCategory, page);
+}
+
+// 실제 AJAX 실행 함수
+function loadItems(category, page) {
+    $.ajax({
+    	url : "/category.do",
+    	type : "get",
+    	dataType: "html",
+    	data :
+    	{
+        	category : category,
+        	page     : page
+    	},
+    	async : true,
+    	success : function(data) 
+    	{
+            $("#category").html(data);
+            $("#category-title").html(categoryTitle);
+            
+            //페이지 상단으로 스크롤 부드럽게 이동
+            window.scrollTo({top: 830, behavior: 'smooth'});
+    	},
+    	error : function(request, status, error) 
+    	{
+        	alert("실패");
+    	}
+    });
+}

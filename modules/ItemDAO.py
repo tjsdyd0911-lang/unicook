@@ -19,14 +19,14 @@ class ItemDAO :
             sql  = "select count(code) as total "
             sql += "from item "
             if category != "0" :
-                sql += f"where category = '{ category }' "
+                sql += f"where category_id = '{ category }' "
             total = db.Select(sql)
             total = db.GetValue(0, "total")
             print(f"total:{total}")
 
             sql  = "select * from item "
             if category != "0" :
-                sql += f"where category = '{ category }' "
+                sql += f"where category_id = '{ category }' "
             sql += "order by view desc "
             sql += f"limit { offset }, 16 "
             

@@ -68,21 +68,72 @@ function ShowLogin()
     })    	
 }
 
- function ShowBunsuk(target)
- {
+function ShowBunsuk(target)
+{
+   $.ajax({
+   	url : "/bunsuk.do?target=" + target,
+   	type : "get",
+   	async : true,
+   	success : function(result) 
+   	{
+   			$("#popupModal").html(result);
+   			var obj = document.getElementById("analysisModal");
+   			var modal = new bootstrap.Modal(obj);
+   			modal.show();                 
+   	},
+   	error : function(request, status, error) 
+   	{
+   	}
+   })  
+}
+
+function CartAdd(code)
+{
     $.ajax({
-    	url : "/bunsuk.do?target=" + target,
+    	url : "/cartadd.do",
     	type : "get",
-    	async : true,
-    	success : function(result) 
+    	dataType: "html",
+    	data :
     	{
-    			$("#popupModal").html(result);
-    			var obj = document.getElementById("analysisModal");
-    			var modal = new bootstrap.Modal(obj);
-    			modal.show();                 
+        	code : code,
+            qty  : $(".qtyCount").text()
+
+    	},
+    	async : true,
+    	success : function(data) 
+    	{
+				if( data == "OK" )
+				{
+					alert("장바구니 담기 성공!");
+				}else
+				{
+					alert("장바구니 담기 실패!");
+				}
     	},
     	error : function(request, status, error) 
     	{
+        	alert("실패");
     	}
-    })  
- }
+    }) 
+}
+
+function QtyMinus()
+{
+    
+    var count = parseInt($(".qtyCount").text());
+    
+    if(count > 1)
+    {
+        count -= 1;
+        $(".qtyCount").empty();
+        $(".qtyCount").text(count);
+    }
+}
+
+function QtyPlus()
+{
+    var count = parseInt($(".qtyCount").text());
+    count += 1;
+    $(".qtyCount").empty();
+    $(".qtyCount").text(count);
+}

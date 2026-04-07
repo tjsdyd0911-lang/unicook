@@ -30,7 +30,7 @@
                     <hr class="text-secondary opacity-25 mb-4">
         
                     <!-- 4. 상세 메타 정보 (아이콘 + 텍스트) -->
-                    <div class="product-info-list mb-5">
+                    <div class="product-info-list mb-2">
                         <div class="d-flex align-items-center mb-3">
                             <span class="info-label me-3 text-dark"><i class="fa-solid fa-truck text-danger me-2"></i>배송정보:</span>
                             <span class="info-value text-secondary">샛별배송 / 택배배송</span>
@@ -40,11 +40,16 @@
                             <span class="info-value text-secondary">{{item.weight}}</span>
                         </div>
                     </div>
-                    
+                    <!-- 수량 조절 -->
+                    <div class="d-flex align-items-center gap-2 mb-5">
+                        <button class="qty-btn" onclick="QtyMinus();"><i class="fa-solid fa-minus fa-xs"></i></button>
+                        <span class="qtyCount px-2">1</span>
+                        <button class="qty-btn" onclick="QtyPlus();"><i class="fa-solid fa-plus fa-xs"></i></button>
+                    </div>
                     <!-- 5. 버튼 영역 -->
                     <div class="d-flex gap-3 mt-auto">
                         <!-- 장바구니 버튼: 흰 배경 + 회색 테두리 -->
-                        <button class="btn btn-outline-secondary flex-grow-1 py-3 rounded-3 bg-white text-dark border-secondary border-opacity-25 shadow-none">
+                        <button onclick="CartAdd({{item.code}});" class="btn btn-outline-secondary flex-grow-1 py-3 rounded-3 bg-white text-dark border-secondary border-opacity-25 shadow-none">
                             <i class="fa-solid fa-cart-shopping me-2"></i>장바구니 담기
                         </button>
                         <!-- 구매하기 버튼: 갈색 배경 -->

@@ -7,6 +7,8 @@ from modules.UserVO  import UserVO
 from modules.UserDAO import UserDAO
 from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
+from modules.CartVO  import CartVO
+from modules.CartDAO import CartDAO
 
 app = Flask(__name__)
 
@@ -37,10 +39,10 @@ def loginok() :
         session["login"] = { "id" : vo.id, "name" : vo.name }
         return "OK";  
 
-#로그아웃 (/logout.do)
+# 로그아웃 (/logout.do)
 @app.route("/logout.do")
 def logout() :
-    session["login"] = None     
+    session["login"] = None
     return redirect("/")
 
 # 상세페이지
@@ -56,6 +58,26 @@ def view() :
 @app.route("/cart.do")
 def cart() :
     return render_template("cart.html")
+
+# 장바구니 추가
+@app.route("/cartadd.do")
+def cartadd() :
+    try :
+        login_info = session.get("login")
+        id   = login_info.get("id")
+        code = request.args.get("code")
+        qty  = request.args.get("qty")
+        
+        
+        code = int(code)
+        qty  = int(qty)
+    
+        dao = CartDAO()
+        
+        dao.CartAdd(id, code, qty)
+        return "OK"   # 저장 성공
+    except :
+        return "FAIL" # 저장 실패
 
 @app.route("/purchase.do")
 def purchase() :

@@ -2,11 +2,15 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import redirect
+
 from flask import session, jsonify
 from modules.UserVO  import UserVO
+
+from flask import session
+
 from modules.UserDAO import UserDAO
-from modules.ItemVO  import ItemVO
 from modules.ItemDAO import ItemDAO
+<<<<<<< HEAD
 
 from modules.CartVO  import CartVO
 from modules.CartDAO import CartDAO
@@ -14,6 +18,10 @@ import math
 
 from modules.BuyVO  import BuyVO
 from modules.BuyDAO  import BuyDAO
+
+
+import math
+from modules.CartDAO import CartDAO
 
 
 app = Flask(__name__)
@@ -27,7 +35,7 @@ def main() :
     dao = ItemDAO()
     total, items = dao.GetList(current_page, category)
     
-    # 페이지 5개씩 구현
+    # 페이지 6개씩 구현
     total_pages = math.ceil(total / 16)
     block_size = 5
     start_page = ((current_page - 1) // block_size) * block_size + 1
@@ -64,6 +72,7 @@ def logout() :
     session["login"] = None
     return redirect("/")
 
+<<<<<<< HEAD
 # 로그인 체크(/loginCheck.do)
 @app.route("/loginCheck.do")
 def login_check() : 
@@ -71,6 +80,29 @@ def login_check() :
         return jsonify({"login" : True})
     else :
         return jsonify({"login" : False})
+=======
+# 카테고리 (/category)
+@app.route("/category.do")
+def category() :
+    current_page = request.args.get('page', 1, type=int)
+    category = request.args.get("category", "0")
+    dao = ItemDAO()
+    total, items = dao.GetList(current_page, category)
+    
+    # 페이지 6개씩 구현
+    total_pages = math.ceil(total / 16)
+    block_size = 5
+    start_page = ((current_page - 1) // block_size) * block_size + 1
+    end_page = start_page + block_size
+    
+    if end_page > total_pages:
+        end_page = total_pages
+    return render_template("_category_partial.html", items        = items,
+                                                     total_pages  = total_pages,
+                                                     current_page = current_page,
+                                                     start_page   = start_page,
+                                                     end_page     = end_page)
+>>>>>>> 86e458b6e749de979d3c908e8cfd21a98bdd9eb6
 
 # 상세페이지
 @app.route("/view.do")

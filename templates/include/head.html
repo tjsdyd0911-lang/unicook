@@ -16,6 +16,36 @@
     <link rel="stylesheet" href="/static/css/unicook.css">
 </head>
 <body>
+    <script>
+        $(document).ready(function()
+        {
+            $("#purchaseBtn").click(function(){
+                DoClick("purchase");
+            });
+            $("#cartBtn").click(function(){
+                DoClick("cart");
+            });
+        });
+        
+        function DoClick(obj)
+        {   
+            /* fetch는 jQuery의 ajax를 좀더 편리하게 사용할 수 있는 도구 입니다. */
+            fetch("/loginCheck.do")
+                .then(response => response.json())
+                .then(data => {
+                    if(data.login){
+                        location.href= obj+".do";
+                    }else{
+                        alert("로그인 하세요.")
+                        location.href="/";
+                    }
+                })
+                .catch(error => {
+                    console.error("에러 발생 : ", error);
+                    alert("오류가 발생했습니다.");
+                });
+        }
+    </script>
 <!-- Header -->
 <nav class="navbar navbar-expand-lg sticky-top py-3">
     <div class="container">
@@ -33,11 +63,11 @@
         </div>
 
         <div class="d-flex align-items-center gap-4">
-            <a href="cart.do" class="text-dark position-relative">
+            <a href="cart.do" class="text-dark position-relative" id="cartBtn">
                 <i class="fa-solid fa-cart-shopping fs-4"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;"></span>
             </a>
-            <button class="btn btn-buy px-4" onclick="document.location='purchase.do'">
+            <button class="btn btn-buy px-4" id="purchaseBtn">
                 구매내역
             </button>
             {% if session["login"] is defined and session["login"] is not none %}

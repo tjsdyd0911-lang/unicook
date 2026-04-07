@@ -13,7 +13,7 @@ class ItemDAO :
         샐러드/샌드위치 : 1, 분식 : 2, 밀키트 : 3, 
         도시락/밥류 : 4, 치킨/피자/핫도그/만두 : 5
         """
-        offset = (int(page) - 1) * 10
+        offset = (int(page) - 1) * 16
         item = []
         with DBManager() as db :
             sql  = "select count(code) as total "
@@ -21,7 +21,9 @@ class ItemDAO :
             if category != "0" :
                 sql += f"where category = '{ category }' "
             total = db.Select(sql)
-            
+            total = db.GetValue(0, "total")
+            print(f"total:{total}")
+
             sql  = "select * from item "
             if category != "0" :
                 sql += f"where category = '{ category }' "
@@ -41,7 +43,6 @@ class ItemDAO :
                 vo.view        = db.GetValue(n, "view")
                 vo.stock       = db.GetValue(n, "stock")
                 item.append(vo)
-        print(total)
         return total, item
     
     def View(self, code, hit_up=True) :

@@ -19,6 +19,28 @@ body {
 a { text-decoration: none; color: inherit; }
 a:hover { color: var(--main-sand); }
 
+.pagination {
+  display: flex; /* 요소 가로 정렬 */
+  list-style: none; /* 점 제거 */
+  padding: 0;
+  justify-content: center; /* 중앙 정렬 */
+}
+
+.pagination a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+/* 활성화 상태 */
+.pagination a.active {
+  background-color: #90775d;
+  color: white;
+  border-color: #90775d;
+}
+
 /* ==========================================================================
    2. 헤더 및 네비게이션 (Navbar)
    ========================================================================== */

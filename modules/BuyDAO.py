@@ -2,7 +2,7 @@ from modules.DBManager import DBManager
 from modules.BuyVO     import BuyVO
 
 class BuyDAO :
-    def GetList(self, id) :
+    def GetList(self, id, period) :
         """
         특정 사용자의 구매 내역 목록 조회 (상품 정보 포함)
         """

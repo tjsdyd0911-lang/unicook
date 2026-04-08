@@ -198,15 +198,45 @@ def purchase():
     # 1. 로그인 여부 확인
     if "login" not in session or session["login"] is None:
         return redirect("/login.do") # 슬래시(/)를 붙이는 것이 더 안전합니다.
+   
+    period = request.args.get("period","1")   
     
     # 2. 세션에서 아이디 가져오기 (따옴표 "id" 확인!)
     user_id = session["login"]["id"] 
     
     dao = BuyDAO()
-    buys = dao.GetList(user_id)
+    buys = dao.GetList(user_id, period)
 
-    # 4. HTML에 전달
-    return render_template("purchase.html", buys=buys)
+        
+    current_page = request.args.get('page', 1, type=int)
+    #purchase = request.args.get("purchase", "0")
+    per_page = 5
+    dao = BuyDAO()
+    buys = dao.GetList(user_id, period)
+    total = len(buys) # 전체 구매 건수
+    maxpage = (total - 1) // per_page + 1;
+    
+    #5개씩 슬라이싱
+    start_page = (current_page -1) * per_page;
+    end_page = start_page + per_page
+    buys = buys[start_page:end_page]
+    
+    
+    #페이지 블록
+    block_size = 5
+    start_page = ((current_page - 1) // block_size) * block_size + 1
+    end_page = start_page + block_size - 1
+      
+    if end_page > maxpage :
+       end_page = maxpage
+    
+    return render_template("purchase.html", 
+                           buys=buys, # 잘려진 구매 내역
+                           period = period,
+                           maxpage=maxpage, 
+                           current_page=current_page,
+                           start_page=start_page, 
+                           end_page=end_page)
 
 # 구매 완료 처리
 @app.route("/purchase.do", methods=["POST"])

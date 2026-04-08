@@ -18,7 +18,6 @@ app.secret_key = "unicook"
 
 @app.before_request 
 def add_header():
-    print("add head...")
     response = make_response("Custom Response Body")
     # 브라우저에게 응답 내용을 캐시(저장)하지 말라고 지시
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -208,12 +207,10 @@ def purchase():
 
     buys = dao.GetList(user_id, period)
 
-        
     current_page = request.args.get('page', 1, type=int)
     #purchase = request.args.get("purchase", "0")
     per_page = 5
-    dao = BuyDAO()
-    buys = dao.GetList(user_id, period)
+  
     total = len(buys) # 전체 구매 건수
     maxpage = (total - 1) // per_page + 1;
     

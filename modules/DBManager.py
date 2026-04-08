@@ -31,7 +31,7 @@ class DBManager :
         cursor.close()
     
     # SELECT 실행
-    def Select(self, sql, params) :
+    def Select(self, sql, params=[]) :
         cursor = self.con.cursor()
         total = cursor.execute(sql, params)
         if total > 0 :

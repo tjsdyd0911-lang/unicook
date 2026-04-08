@@ -16,7 +16,7 @@
                     </div>
                     <!-- 상품 아이템 -->
                     {% for item in cart_list %}
-                        <div class="cart-item-container d-flex align-items-start mb-4 position-relative" data-cno="{{item.cno}}">
+                        <div class="cart-item-container d-flex align-items-start mb-4 position-relative" data-cno="{{item.cno}}" data-price="{{item.price_num}}">
                             <input id="item-code" type="hidden" type="text" value="{{item.code}}">
                             <div class="form-check mt-3 me-3">
                                 <input class="form-check-input item-checkbox" type="checkbox" checked>
@@ -71,7 +71,7 @@
                     {% for item in cart_list %}
                         <div class="mb-3 text-muted text-end cart-summary-item" data-cno="{{item.cno}}">
                             <div class="flex-grow-1">
-                                <div class="fw-bold small text-truncate ms-auto" style="max-width: 305px;">
+                                <div class="fw-bold text-truncate ms-auto" style="max-width: 305px;">
                                     {{item.item_name}}
                                 </div>
                                 <div class="small">{{item.price}} x {{item.qty}}</div>

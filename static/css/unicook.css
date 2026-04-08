@@ -41,9 +41,18 @@ a:hover { color: var(--main-sand); }
   border-color: #90775d;
 }
 
+
 /* ==========================================================================
    2. 헤더 및 네비게이션 (Navbar)
    ========================================================================== */
+
+#keyword::placeholder {
+    color: #8b7355;
+    font-weight: bold;
+    opacity: 0.6;
+    font-size: 0.9em;
+}
+
 .navbar { 
     background-color: #ffffff !important; 
     border-bottom: 1px solid var(--light-sand); 

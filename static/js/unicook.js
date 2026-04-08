@@ -52,6 +52,30 @@ window.onload = function()
     	searchKeyword();
 	});
 }
+// 시간대에 맞게 화면에 출력
+$(document).ready(function() {
+
+    // 현재 시간 가져오기
+    var nowHour = new Date().getHours();
+    var TimeText = "";
+
+    // 시간대 조건문
+    if (nowHour >= 7 && nowHour < 11) {
+        TimeText = "상쾌한 아침이에요! 추천 메뉴 확인하세요.";
+        $("#keyword").attr("placeholder", " 아침 뭐 먹지?");
+    } else if (nowHour >= 11 && nowHour < 16) {
+        TimeText = "즐거운 점심 식사! 인기 메뉴 어때요?";
+        $("#keyword").attr("placeholder", " 점심 뭐 먹지?");
+    } else if (nowHour >= 16 && nowHour < 20) {
+        TimeText = "고단한 하루의 끝, 맛있는 저녁 한 끼 어때요?";
+        $("#keyword").attr("placeholder", " 저녁 뭐 먹지?");
+    } else {
+        TimeText = "야식이 생각나는 밤, 지금 핫한 메뉴는?";
+        $("#keyword").attr("placeholder", " 야식 뭐 먹지?");
+    }
+
+    $("#time-text").text(TimeText);
+});
 
 function searchKeyword() 
 {
@@ -144,8 +168,14 @@ function CartAdd(code)
              
                 $("#cart-badge").text(response.new_count);
                 
-            } else {
-                alert(response.message || "장바구니 담기 실패!");
+            } else if(response.result === "login"){
+                alert(response.message);
+            } else if(response.result === "duplicate"){
+                alert(response.message);
+            } else if(response.result === "duplicate"){
+                alert(response.message);
+            } else{
+                alert("장바구니 담기 실패!");
             }
     	},
     	error : function(request, status, error) 
@@ -157,6 +187,8 @@ function CartAdd(code)
 // 수량 감소
 function QtyMinus(obj)
 {
+    var container = $(obj).closest(".cart-item-container");
+    var cno = container.attr("data-cno");
     var qtyCount = $(obj).siblings(".qtyCount")
     var count    = parseInt(qtyCount.text());
     
@@ -164,15 +196,48 @@ function QtyMinus(obj)
     {
         count -= 1;
         qtyCount.text(count);
+        if(typeof cno != "undefined"){
+            updateQty(cno, count);
+        }
     }
 }
 // 수량 증가
 function QtyPlus(obj)
 {
+    var container = $(obj).closest(".cart-item-container");
+    var cno = container.attr("data-cno");
     var qtyCount = $(obj).siblings(".qtyCount")
     var count    = parseInt(qtyCount.text());
+    
     count += 1;
     qtyCount.text(count);
+    if(typeof cno != "undefined"){
+        updateQty(cno, count);
+    }
+}
+
+function updateQty(cno, count)
+{
+    $.ajax({
+        url: '/update_cart_qty.do', // 본인의 서버 엔드포인트에 맞게 수정
+        method: 'POST',
+        data: {
+            cno: cno,
+            qty: count
+        },
+        success: function(data) {
+            
+            if(data == "success"){
+                updateFinalTotal();
+            } else{
+                alert("수량 변경에 실패했습니다.");
+            }
+            
+        },
+        error: function(err) {
+            alert("수량 변경에 실패했습니다.");
+        }
+    });
 }
 
 // 장바구니 체크박스 및 선택삭제 부분
@@ -287,17 +352,22 @@ function updateFinalTotal() {
     $(".cart-item-container").each(function() {
         // 체크박스 체크되어 있는지 확인
         let cno = $(this).attr("data-cno");
+        let qty = parseInt($(this).find(".qtyCount").text());
+        let unitPrice = parseInt($(this).data("price"));
         let isChecked = $(this).find(".item-checkbox").prop("checked");
-
         let summaryItem = $(".cart-summary-item[data-cno='" + cno + "']");
 
         if (isChecked) {
         
-            summaryItem.show();
+            summaryItem.find(".small").text(unitPrice.toLocaleString() + "원 x " + qty);
+            let itemTotal = unitPrice * qty;
             
             // 체크된 경우에만 금액을 더함
             let val = summaryItem.find(".item-total-price").attr("data-value");
-            totalSum += parseInt(val);
+            
+            totalSum += itemTotal;
+            summaryItem.show();
+            
         }else{
             summaryItem.hide();
         }

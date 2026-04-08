@@ -38,6 +38,11 @@ class CartDAO :
             sql += f"values('{id}', {code}, {qty}, now())"
             return db.RunSQL(sql)
     
+    def CartQtyUdate(self, cno, qty) :
+        with DBManager() as db :
+            sql = f"update cart set qty = {qty} where cno = {cno} "
+            return db.RunSQL(sql)
+        
     def CartDelete(self, cnos) :
         
         if not isinstance(cnos, list) :

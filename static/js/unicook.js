@@ -58,7 +58,7 @@ function searchKeyword()
     keyword = $("#keyword").val();
     keywordTitle = "[" + keyword + "] 관련 상품"
     $.ajax({
-    	url : "/search.do",
+    	url : "/navi.do",
     	type : "get",
     	dataType: "html",
     	data :
@@ -72,7 +72,7 @@ function searchKeyword()
             if (keyword) {
                 $("#category-title").html(keywordTitle);
             }else{
-                $("#category-title").html("전체 보기");
+                $("#category-title").html("전체보기");
             }
             
             //페이지 상단으로 스크롤 부드럽게 이동
@@ -341,7 +341,7 @@ function changePage(page) {
 // 실제 AJAX 실행 함수
 function loadItems(category, page) {
     $.ajax({
-    	url : "/category.do",
+    	url : "/navi.do",
     	type : "get",
     	dataType: "html",
     	data :

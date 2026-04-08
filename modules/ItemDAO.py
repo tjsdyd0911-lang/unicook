@@ -16,25 +16,31 @@ class ItemDAO :
         offset = (int(page) - 1) * 16
         item = []
         with DBManager() as db :
+            conditions = []
+            params     = []
+            if category != "0" :
+                conditions.append("category_id = %s")
+                params.append(category)
+            if keyword :
+                conditions.append("item_name LIKE %s")
+                params.append(f"%{ keyword }%")
+                
             sql  = "select count(code) as total "
             sql += "from item "
-            if category != "0" :
-                sql += f"where category_id = '{ category }' "
-            if keyword :
-                sql += f"where item_name LIKE '%{ keyword }%' "    
-            total = db.Select(sql)
+            if conditions :
+                sql += "where " + " AND ".join(conditions)
+                
+            total = db.Select(sql, params)
             total = db.GetValue(0, "total")
             print(f"total:{total}")
 
             sql  = "select * from item "
-            if category != "0" :
-                sql += f"where category_id = '{ category }' "
-            if keyword :
-                sql += f"where item_name LIKE '%{ keyword }%' "
+            if conditions :
+                sql += "where " + " AND ".join(conditions)
             sql += "order by view desc "
             sql += f"limit { offset }, 16 "
             
-            count = db.Select(sql)
+            count = db.Select(sql, params)
             for n in range(count) :
                 vo = ItemVO()
                 vo.code        = db.GetValue(n, "code")

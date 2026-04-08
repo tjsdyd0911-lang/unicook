@@ -1,6 +1,8 @@
 // ajax 통신으로 로그인 처리
 window.onload = function()
 {
+    window.scrollTo(0, 0);
+    
 	$(document).on("click", "#btnLogin", function() {
 		if($("#id").val() == "")
 		{
@@ -48,41 +50,10 @@ window.onload = function()
 		
 	});
 	
-	$("#btnSearch").on("click", function(){
+	$("#FrmSubmit").on("submit", function(e){
+    	e.preventDefault(); //새로고침 방지
     	searchKeyword();
 	});
-}
-
-function searchKeyword() 
-{
-    keyword = $("#keyword").val();
-    keywordTitle = "[" + keyword + "] 관련 상품"
-    $.ajax({
-    	url : "/search.do",
-    	type : "get",
-    	dataType: "html",
-    	data :
-    	{
-        	keyword : keyword
-    	},
-    	async : true,
-    	success : function(data) 
-    	{
-            $("#category").html(data);
-            if (keyword) {
-                $("#category-title").html(keywordTitle);
-            }else{
-                $("#category-title").html("전체 보기");
-            }
-            
-            //페이지 상단으로 스크롤 부드럽게 이동
-            window.scrollTo({top: 830, behavior: 'smooth'});
-    	},
-    	error : function(request, status, error) 
-    	{
-        	alert("실패");
-    	}
-    });
 }
 
 // 로그인 페이지 모달 ajax로 활성화
@@ -318,9 +289,11 @@ $(document).on("change", "#selectAll", function() {
     setTimeout(updateFinalTotal, 10);
 });
 
-// 카테고리 목록부분
-let currentCategory = 0;
-let categoryTitle   = "";
+// 검색&카테고리 목록부분
+let currentCategory = 0
+let categoryTitle   = ""
+let keyword = ""
+let keywordTitle = ""
 // 카테고리 선택 시
 function selectCategory(element)
 {
@@ -329,31 +302,50 @@ function selectCategory(element)
     $(element).addClass('fw-bold');
     categoryTitle = $(element).text();
     
-    currentCategory = $(element).data('value'); 
+    currentCategory = $(element).data('value');
+    keyword = ""
     loadItems(currentCategory, 1);
 }
 
 // 페이지 번호 클릭 시
 function changePage(page) {
-    loadItems(currentCategory, page);
+    loadItems(currentCategory, page, keyword);
+}
+
+// 검색 시
+function searchKeyword() {
+    keyword = $("#keyword").val();
+    keywordTitle = "[" + keyword + "] 관련 상품"
+    currentCategory = 0
+    loadItems(currentCategory, 1, keyword);
 }
 
 // 실제 AJAX 실행 함수
-function loadItems(category, page) {
+function loadItems(category, page, keyword) {
     $.ajax({
-    	url : "/category.do",
+    	url : "/navi.do",
     	type : "get",
     	dataType: "html",
     	data :
     	{
         	category : category,
-        	page     : page
+        	page     : page,
+        	keyword  : keyword
     	},
     	async : true,
     	success : function(data) 
     	{
             $("#category").html(data);
-            $("#category-title").html(categoryTitle);
+            if (keyword) {
+                $("#category-title").html(keywordTitle);
+            }
+            else if (categoryTitle) {
+                $("#category-title").html(categoryTitle);
+            }
+            else{
+                $("#category-title").html("전체보기");
+            }
+            
             
             //페이지 상단으로 스크롤 부드럽게 이동
             window.scrollTo({top: 830, behavior: 'smooth'});

@@ -301,7 +301,7 @@ a:hover { color: var(--main-sand); }
 /* 요약 카드 */
 .summary-card { 
     background: white; border: 1px solid #eeece0; border-radius: 15px; 
-    padding: 20px; text-align: center; height: 100%; 
+    padding: 20px; text-align: center;
 }
 .summary-value { font-size: 2.2rem; font-weight: 800; color: #7a6b5a; display: block; line-height: 1.2; }
 .summary-label { font-size: 0.85rem; color: #9a9085; margin-top: 5px; display: block; }
@@ -311,7 +311,7 @@ a:hover { color: var(--main-sand); }
 /* 내부 콘텐츠 박스 */
 .inner-report-card { 
     background: white; border: 1px solid #eeece0; border-radius: 15px; 
-    padding: 25px; height: 100%; 
+    padding: 25px;
 }
 .inner-title { 
     font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; 
@@ -319,7 +319,7 @@ a:hover { color: var(--main-sand); }
 }
 
 /* 프로그레스 바 스타일 */
-.prog-item { margin-bottom: 18px; }
+.prog-item { margin-bottom: 21px; }
 .prog-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; }
 .progress { height: 12px; border-radius: 10px; background-color: #f0ede5; }
 .bar-protein { background-color: #839b7d !important; }

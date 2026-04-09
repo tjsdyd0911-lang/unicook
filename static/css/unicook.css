@@ -227,6 +227,11 @@ a:hover { color: var(--main-sand); }
     border-color: var(--main-sand); 
 }
 
+.purchase {
+     width : 80%;
+     margin : 0 auto;
+}
+
 /* 주문 내역 카드 */
 .order-card { 
     background: var(--card-bg); 

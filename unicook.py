@@ -197,33 +197,30 @@ def cartdelete() :
 @app.route("/purchase.do")
 def purchase():
    
-    # 1. 로그인 여부 확인
+    # 로그인 여부 확인
     if "login" not in session or session["login"] is None:
         return redirect("/login.do") # 슬래시(/)를 붙이는 것이 더 안전합니다.
     
-    period = request.args.get("period","1")   
     
-    # 2. 세션에서 아이디 가져오기 (따옴표 "id" 확인!)
+    period = request.args.get("period","all")   
+    current_page = request.args.get('page', 1, type=int)
+    
+    # 세션에서 아이디 가져오기 (따옴표 "id" 확인!)
     user_id = session["login"]["id"] 
     
-    dao = BuyDAO()
-
-    buys = dao.GetList(user_id, period)
-
-    current_page = request.args.get('page', 1, type=int)
-    #purchase = request.args.get("purchase", "0")
     per_page = 5
-  
-    total = len(buys) # 전체 구매 건수
-    maxpage = (total - 1) // per_page + 1;
     
-    #5개씩 슬라이싱
+    dao   = BuyDAO()
+    total = dao.GetCount(user_id, period)    
+    buys  = dao.GetList(user_id, period, current_page, per_page)
+    
+    maxpage = (total - 1) // per_page + 1 if total > 0 else 1
+    
+    # 5개씩 슬라이싱
     start_page = (current_page -1) * per_page;
     end_page = start_page + per_page
-    buys = buys[start_page:end_page]
     
-    
-    #페이지 블록
+    # 페이지 블록
     block_size = 5
     start_page = ((current_page - 1) // block_size) * block_size + 1
     end_page = start_page + block_size - 1

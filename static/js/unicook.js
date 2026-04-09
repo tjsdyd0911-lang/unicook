@@ -377,10 +377,19 @@ function selectCategory(element)
     loadItems(currentCategory, 1);
 }
 
-// 페이지 번호 클릭 시
-function changePage(page) {
-    loadItems(currentCategory, page, keyword);
-}
+$(document).ready(function() {
+    $(".filter-btn").on("click", function() {
+        // 클릭한 버튼 -> active 클래스 추가, 나머지는 제거
+        $(".filter-btn").removeClass("active");
+        $(this).addClass("active");
+
+        // 선택된 기간 값 -> all(전체), 1m(1달), 3m(3달)
+        const period = $(this).data("period");
+
+        // 페이징
+        location.href = "/purchase.do?page=1&period=" + period;
+    });
+});
 
 // 검색 시
 function searchKeyword() {

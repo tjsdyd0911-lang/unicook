@@ -1,19 +1,13 @@
 {% include 'include/head.html' %}
     <main class="container mb-5"><br>
-        <h3 class="fw-bold mb-4">구매 내역</h3>
+        <h3 class="fw-bold mb-4 purchase">구매 내역</h3>
 
         <!-- 필터 박스 -->
-        <div class="filter-box d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="filter-box d-flex flex-wrap align-items-center justify-content-between gap-3 purchase">
             <div class="d-flex gap-2">
-                <button class="filter-btn active">최근 1개월</button>
-                <button class="filter-btn">3개월</button>
-                <button class="filter-btn">전체</button>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <input type="date" class="form-control form-control-sm">
-                <span>~</span>
-                <input type="date" class="form-control form-control-sm">
-                <button class="btn btn-sm btn-sand px-6">조회</button>
+                <button class="filter-btn {{ 'active' if period == 'all' else '' }}" data-period="all">전체</button>
+                <button class="filter-btn {{ 'active' if period == '1m' else '' }}" data-period="1m">최근 1개월</button>
+                <button class="filter-btn {{ 'active' if period == '3m' else '' }}" data-period="3m">3개월</button>
             </div>
         </div>
     
@@ -21,45 +15,41 @@
 {% if buys %}  
    {% for buy in buys %}
    
-       <div class="order-card mb-4">
+       <div class="order-card mb-4 purchase">
            <!-- 주문 헤더 (날짜, 주문번호, 상세링크) -->
            <div class="order-header">
                <div>
                    <span class="fw-bold me-2">{{ buy.btime }}</span>
                    <span class="text-muted small">주문번호: {{ buy.bno }}</span>
                </div>
-               <a href="/order_detail.do?bno={{ buy.bno }}" class="text-decoration-none small text-muted">
-                   주문상세 <i class="fa-solid fa-chevron-right fa-xs"></i>
-               </a>
            </div>
            <!-- 주문 바디 (이미지, 정보, 가격) -->
-           <div class="order-body d-flex align-items-center gap-4">
-           
-               <!-- 상품 이미지 및 수량 배지 -->
-               <div class="position-relative">
-                   <img src="{{buy.image}}" class="custom-product-img rounded shadow-sm" 
-                        onerror="this.src='/static/img/no-image.png'" 
-                        style="width: 80px; height: 80px; object-fit: cover;">
-                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark opacity-75" style="font-size: 0.7rem;">
-                       {{ buy.qty }}
-                   </span>
+           <a href="/view.do?code={{buy.code}}">
+               <div class="order-body d-flex align-items-center gap-4">
+                   <!-- 상품 이미지 및 수량 배지 -->
+                   <div class="position-relative">
+                       <img src="{{buy.image}}" class="custom-product-img rounded shadow-sm" 
+                            onerror="this.src='/static/img/no-image.png'" 
+                            style="width: 80px; height: 80px; object-fit: cover;">
+                       <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark opacity-75" style="font-size: 0.7rem;">
+                           {{ buy.qty }}
+                       </span>
+                   </div>
+                   <!-- 상품 정보 및 결제금액 -->
+                   <div class="flex-grow-1">
+                       <span class="badge bg-success mb-2" style="font-size: 0.7rem;">결제완료</span>
+                       <h6 class="fw-bold mb-1">{{ buy.item_name }}</h6>
+                       <p class="text-muted small mb-0">
+                           단가 {{ "{:,}".format(buy.price) }}원 <span class="mx-1">|</span> 
+                           <strong>총 결제금액 {{ "{:,}".format(buy.price * buy.qty) }}원</strong>
+                       </p>
+                   </div>
+                   <!-- 재구매 버튼 (선택 사항) -->
+                   <div>
+                       <button class="btn btn-outline-sand btn-sm px-3" style="font-size: 0.8rem;">제품상세</button>
+                   </div>
                </div>
-            
-               <!-- 상품 정보 및 결제금액 -->
-               <div class="flex-grow-1">
-                   <span class="badge bg-success mb-2" style="font-size: 0.7rem;">결제완료</span>
-                   <h6 class="fw-bold mb-1">{{ buy.item_name }}</h6>
-                   <p class="text-muted small mb-0">
-                       단가 {{ "{:,}".format(buy.price) }}원 <span class="mx-1">|</span> 
-                       <strong>총 결제금액 {{ "{:,}".format(buy.price * buy.qty) }}원</strong>
-                   </p>
-               </div>
-    
-               <!-- 재구매 버튼 (선택 사항) -->
-               <div>
-                   <button class="btn btn-outline-sand btn-sm px-3" style="font-size: 0.8rem;">재구매</button>
-               </div>
-           </div>
+           </a>
        </div> <!-- .order-card 끝 -->
    {% endfor %}
 {% else %}
@@ -78,15 +68,15 @@
     <nav aria-label="Page navigation">
       <ul class="pagination">
         {% if current_page > 1 %}
-          <li><a href="javascript:void(0)" onclick="changePage({{ current_page - 1 }})">&laquo; 이전</a></li>
+          <li><a href="/purchase.do?page={{ current_page - 1 }}&period={{ period }}">&laquo; 이전</a></li>
         {% endif %}
         {% for page in range(start_page, end_page + 1) %}
           <li>
-              <a href="/purchase.do?page={{ page }}" class="{{ 'active' if page == current_page else '' }}">{{ page }}</a> 
+              <a href="/purchase.do?page={{ page }}&period={{ period }}" class="{{ 'active' if page == current_page else '' }}">{{ page }}</a> 
           </li>
         {% endfor %}
         {% if current_page < maxpage %}
-          <li><a href="/purchase.do?page={{ current_page + 1 }}">다음 &raquo;</a></li>
+          <li><a href="/purchase.do?page={{ current_page + 1 }}&period={{ period }}">다음 &raquo;</a></li>
         {% endif %}
       </ul>
     </nav>

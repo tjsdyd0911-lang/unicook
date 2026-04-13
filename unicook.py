@@ -12,6 +12,7 @@ from modules.ItemDAO import ItemDAO
 from modules.CartDAO import CartDAO
 from modules.BuyDAO  import BuyDAO
 from modules.TimeDAO import TimeDAO
+from modules.RecommendDAO import RecommendDAO
 
 app = Flask(__name__)
 
@@ -214,6 +215,9 @@ def purchase():
     total = dao.GetCount(user_id, period)    
     buys  = dao.GetList(user_id, period, current_page, per_page)
     
+    dao = RecommendDAO()
+    reco_items = dao.RecommendItem(user_id)
+    
     maxpage = (total - 1) // per_page + 1 if total > 0 else 1
     
     # 5개씩 슬라이싱
@@ -234,7 +238,8 @@ def purchase():
                            maxpage=maxpage, 
                            current_page=current_page,
                            start_page=start_page, 
-                           end_page=end_page)
+                           end_page=end_page,
+                           reco_items = reco_items)
 
 # 구매 완료 처리
 @app.route("/purchase.do", methods=["POST"])
@@ -265,9 +270,23 @@ def purchaseadd():
         
     return "success"
 
+#추천 상품
 @app.route("/bunsuk.do")
 def bunsuk_main() :
     target = request.args.get("target","main")
+    product_id = request.args.get("id","")
+    
+    dao = RecommendDAO()
+    if target == "purchase" :
+        #구매내역
+        userid = session["login"]["id"]
+        dao.MakePersonalBestRecommendations(userid, algo_type = "best")
+        total,items = dao.GetByUserFrequency(userid, n=4, algo_type = "best")
+        if int(total) > 0 :
+            return render_template("/bunsuk.html", target = target, total = total , items = items)     
+        else :
+            return "<div id='noItem' class='cart-card d-flex align-items-center'>추천 상품이 없습니다.</div>"        
+    
     return render_template("bunsuk.html",target = target)
     #return render_template(f"bunsuk_{target}.html",target = target)
 
@@ -282,7 +301,7 @@ def info() :
     cart_data = cart_dao.GetList(id) if id else []
     
     return dict(cart={'cnt': len(cart_data)})
-    
+
 # main 함수
 if __name__ == "__main__" :
     app.run(port=8000)

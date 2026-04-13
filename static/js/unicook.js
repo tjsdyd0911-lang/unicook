@@ -486,5 +486,4 @@ function purchase(){
             alert("서버 통신 오류가 발생했습니다.");
         }
     });
-    
 }

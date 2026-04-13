@@ -32,12 +32,11 @@ class ItemDAO :
                 
             total = db.Select(sql, params)
             total = db.GetValue(0, "total")
-            print(f"total:{total}")
 
             sql  = "select * from item "
             if conditions :
                 sql += "where " + " AND ".join(conditions)
-            sql += "order by view desc "
+            sql += " order by view desc "
             sql += f"limit { offset }, 16 "
             
             count = db.Select(sql, params)

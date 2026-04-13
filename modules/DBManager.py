@@ -9,9 +9,9 @@ class DBManager :
     # DB연결
     def __enter__(self) :
         try : 
-            self.con = pymysql.connect(host="192.168.0.35",
-                                       user="unicook",
-                                       password="cook",
+            self.con = pymysql.connect(host="127.0.0.1",
+                                       user="root",
+                                       password="ezen",
                                        db="unicook",
                                        charset="utf8")
             return self

@@ -55,6 +55,7 @@ window.onload = function()
     	searchKeyword();
 	});
 }
+
 // 시간대에 맞게 화면에 출력
 $(document).ready(function() {
 
@@ -89,10 +90,10 @@ function ShowLogin()
     	async : true,
     	success : function(result) 
     	{
-    			$("#popupModal").html(result);
-    			var obj = document.getElementById("loginModal");
-    			var modal = new bootstrap.Modal(obj);
-    			modal.show();                 
+ 			$("#popupModal").html(result);
+ 			var obj = document.getElementById("loginModal");
+ 			var modal = new bootstrap.Modal(obj);
+ 			modal.show();                 
     	},
     	error : function(request, status, error) 
     	{
@@ -111,13 +112,125 @@ function ShowBunsuk(target)
    			$("#popupModal").html(result);
    			var obj = document.getElementById("analysisModal");
    			var modal = new bootstrap.Modal(obj);
-   			modal.show();                 
+   			modal.show();
+   			ShowChart();
    	},
    	error : function(request, status, error) 
    	{
    	}
-   })  
+   });
 }
+
+
+
+function ShowChart()
+{    
+    let counts = {}
+    let qtys   = {}
+    $.ajax({
+    	url : "/mixed.do",
+    	type : "get",
+    	dataType: "json",
+    	async : true,
+    	success : function(response) 
+    	{
+        	counts = response.counts
+        	qtys   = response.qtys
+    	},
+    	error : function(request, status, error) 
+    	{
+        	alert("실패");
+    	}
+    });
+    
+    // 1. 레이더 차트 그리기
+    const ctx = document.getElementById('mixedChart').getContext('2d');
+    new Chart(ctx, {
+        data: {
+            labels: {{ labels | tojson }},
+            datasets: [
+                {
+                    type: 'bar', // 막대 그래프: 구매량
+                    label: '총 구매량 (Qty)',
+                    data: {{ qtys | tojson }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1,
+                    yAxisID: 'y_qty', // 왼쪽 축 사용
+                },
+                {
+                    type: 'line', // 선 그래프: 구매 횟수
+                    label: '구매 횟수 (Freq)',
+                    data: {{ counts | tojson }},
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.3, // 선을 부드럽게
+                    yAxisID: 'y_freq', // 오른쪽 축 사용
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y_qty: { // 왼쪽 Y축 (구매량)
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: '구매량 (Units)' },
+                    beginAtZero: true
+                },
+                y_freq: { // 오른쪽 Y축 (구매 횟수)
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: '구매 횟수 (Times)' },
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false }, // 격자선 중복 방지
+                }
+            }
+        }
+    });
+}
+
+function ShowItem() 
+{
+    $.ajax({
+    	url : "/recommend.do",
+    	type : "get",
+    	dataType: "json",
+    	async : true,
+    	success : function(reco_dict) 
+    	{
+        	let html = "";
+
+            reco_dict.forEach(function(item) 
+            {
+                html += `
+                    <div class="col-6 col-md-3">
+                        <a href="/view.do?code=${item.code}">
+                            <div class="product-card">
+                                <img src="${item.image}">
+                                <div class="product-name">${item.item_name}</div>
+                                <div class="product-price">${item.price}</div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            });
+            $('#reco_items').html(html);
+            
+            window.scrollTo(0, document.body.scrollHeight);
+    	},
+    	error : function(request, status, error) 
+    	{
+        	alert("실패");
+    	}
+    });
+}
+
+
 // 장바구니에 상품 추가
 function CartAdd(code)
 {

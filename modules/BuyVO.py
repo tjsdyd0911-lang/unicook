@@ -12,3 +12,6 @@ class BuyVO :
         self.price       = 0    # 가격
         self.image       = ""   # 상품 이미지
         self.category_id = 0    # 카테고리 ID (분석용)
+        
+        # chart data 가져올 추가 정보
+        self.count = 0  # 구매횟수

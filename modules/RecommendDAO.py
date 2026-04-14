@@ -509,7 +509,7 @@ class RecommendDAO  :
                 sql += f"('{target_user_id}','{code}','{score}','{algo_type}') "
                 #print(sql)
                 db.RunSQL(sql)         
-        
+        print(ndf)
         return ndf
 
     def UpdateRecommand(self,userid) :
@@ -520,11 +520,13 @@ class RecommendDAO  :
         self.MakeUserFrequency(userid,top_k=10, algo_type="main")
         print(f"{userid}를 위한 상품 추천 정보 갱신 종료 =================")
 
-    def RecommendItem(self, userid) :
+    def RecommendItem(self, userid, algo_type) :
         item = []
         with DBManager() as db :
             conditions = []
             params     = []
+            conditions.append("algo_type = %s")
+            params.append(algo_type)
             if userid :
                 conditions.append("id = %s")
                 params.append(userid)
@@ -552,25 +554,5 @@ dao = RecommendDAO()
 df = dao.MakePersonalBestRecommendations(target_user)
 print(df)
 """
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     

@@ -216,8 +216,8 @@ def purchase():
     buys  = dao.GetList(user_id, period, current_page, per_page)
     
     dao = RecommendDAO()
-    reco_items = dao.RecommendItem(user_id)
-    
+    reco_items = dao.RecommendItem(user_id, "best")
+
     maxpage = (total - 1) // per_page + 1 if total > 0 else 1
     
     # 5개씩 슬라이싱
@@ -289,6 +289,51 @@ def bunsuk_main() :
     
     return render_template("bunsuk.html",target = target)
     #return render_template(f"bunsuk_{target}.html",target = target)
+
+# 분석한 추천 상품
+@app.route("/recommend.do")
+def recommend() :
+    # 로그인 여부 확인
+    if "login" not in session or session["login"] is None:
+        return redirect("/login.do")
+    
+    user_id = session["login"]["id"] 
+    
+    dao = RecommendDAO()
+    reco_items = dao.RecommendItem(user_id, "best")
+    reco_dict = [
+        {
+            "code": vo.code, 
+            "image": vo.image, 
+            "item_name": vo.item_name, 
+            "price": vo.price
+        } for vo in reco_items
+    ]
+    
+    return jsonify(reco_dict)
+
+# 구매내역 분석 시각화
+@app.route("/mixed.do")
+def mixed() :
+    user_id = session["login"]["id"] 
+    
+    dao = BuyDAO()
+    counts, qtys = dao.GetChartData(user_id)
+    counts_dict = [
+        {
+            "item_name": vo.item_name, 
+            "count": vo.count, 
+        } for vo in counts
+    ]
+    
+    qtys_dict = [
+        {
+            "item_name": vo.item_name, 
+            "qty": vo.qty, 
+        } for vo in qtys
+    ]
+
+    return jsonify(counts = counts_dict, qtys = qtys_dict)
 
 # 로그인 시 장바구니에 담긴 상품 갯수 조회를 헤더에 항상 표시하기 위한 함수
 # @app.context_processor -> 공통 데이터 담당 (항상 표시해야될 데이터에 사용)

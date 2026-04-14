@@ -60,3 +60,71 @@ class BuyDAO :
             if count > 0:
                 return db.GetValue(0, 'cnt')
             return 0
+        
+    def GetChartData(self, id) :
+        """
+        구매 횟수 및 구매 수량 목록 조회 (상품 정보 포함)
+        """
+        count_list = []
+        qty_list   = []
+        with DBManager() as db :
+            # buy 테이블(b)과 item 테이블(i)을 code 기준으로 조인
+            # 구매 횟수 구하는 구문
+            sql  = "select i.item_name as item_name, "
+            sql += "count(select count(i.item_name) "
+            sql += "from buy b join item i on b.code = i.code "
+            sql += "where id='{id}') as count "
+            sql += "from buy b "
+            sql += "join item i on b.code = i.code "
+            sql += f"where b.id = '{id}' "
+            sql += "group by i.item_name"
+            sql += "order by count desc " 
+            
+            count = db.Select(sql)
+            for n in range(count) :
+                vo = BuyVO()
+                vo.item_name   = db.GetValue(n, "item_name")
+                vo.count       = db.GetValue(n, "count")
+                
+                count_list.append(vo)
+            
+            # buy 테이블(b)과 item 테이블(i)을 code 기준으로 조인
+            # 구매 수량 구하는 구문
+            sql  = "select i.item_name as item_name, sum(b.qty) as qty "
+            sql += "from buy b "
+            sql += "join item i on b.code = i.code "
+            sql += f"where b.id = '{id}' "
+            sql += "group by i.item_name"
+            sql += "order by qty desc "
+        
+            qty = db.Select(sql)
+            for n in range(qty) :
+                vo = BuyVO()
+                vo.item_name   = db.GetValue(n, "item_name")
+                vo.qty         = db.GetValue(n, "qty")
+                
+                qty_list.append(vo)
+        
+        return count_list, qty_list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

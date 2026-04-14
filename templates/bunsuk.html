@@ -237,23 +237,25 @@
     <style>
     .algo-box { background: #f0ede9; border-radius: 10px; padding: 15px; font-size: 0.85rem; line-height: 1.6; }
     </style>
-    <div class="modal fade" id="analysisModal" tabindex="-1">
+    <div class="modal fade" id="analysisModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">📉 SVD 알고리즘 연관분석 리포트</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold">📉 개인별 최애 상품분석 리포트</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="ShowItem();"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row align-items-center">
                         <div class="col-md-7">
-                            <h6 class="fw-bold text-primary mb-3">아이템 간 연관 지수 (Cosine Similarity)</h6>
-                            <canvas id="similarityChart"></canvas>
+                            <h5>📊 {{ session.login.name }}님의 쇼핑 성향 분석</h5>
+                            <div style="width: 800px; margin: 0 auto;">
+                                <canvas id="mixedChart"></canvas>
+                            </div>
                         </div>
                         <div class="col-md-5">
                             <div class="algo-box mb-3">
-                                <strong>💡 분석 원리 (협업 필터링)</strong><br>
-                                유저-상품 매트릭스(Matrix)를 <span class="text-danger">SVD(특이값 분해)</span>하여 상품의 잠재적 특징을 20차원 벡터로 추출했습니다.
+                                <strong>💡 분석 원리 (가중치 점수)</strong><br>
+                                빈도와 수량을 <span class="text-danger">가중치를 두어(빈도 * 0.7) + (수량 * 0.3)</span>상품의 충성도와 기여도를 레이더 차트로 추출했습니다.
                             </div>
                             <div class="algo-box">
                                 <strong>📈 분석 결과</strong><br>
@@ -264,60 +266,10 @@
                         </div>
                     </div>
                     <div class="mt-4 p-3 rounded text-center" style="background: var(--kurly-beige);">
-                        현재 상품과 <strong>가장 높은 상관계수</strong>를 가진 상위 3개 아이템을 도출했습니다.
+                        현재 상품과 <strong>가장 높은 상관계수</strong>를 가진 상위 4개 아이템을 도출했습니다.
                     </div>
                 </div>
             </div>
         </div>
     </div>    
-    <script>
-        var chartInstance = null;
-        ShowChart();
-        
-        function ShowChart()
-        {    
-            // 1. 데이터 정의 (아까 말씀하신 카테고리 매핑 활용)
-            const ctx = document.getElementById('similarityChart').getContext('2d');
-            
-            const data = {
-                labels: ['한식', '중식', '양식', '일식'], // 범례 이름
-                datasets: [{
-                    label: '음식점 수',
-                    data: [12, 19, 7, 5], // 실제 데이터 값
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.6)',  // 한식 (빨강)
-                        'rgba(54, 162, 235, 0.6)', // 중식 (파랑)
-                        'rgba(255, 206, 86, 0.6)', // 양식 (노랑)
-                        'rgba(75, 192, 192, 0.6)'  // 일식 (초록)
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            };
-    
-            // 2. 차트 생성
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'bar', // 차트 종류: 파이
-                data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top', // 범례 위치
-                        },
-                        title: {
-                            display: true,
-                            text: '우리 동네 맛집 분포'
-                        }
-                    }
-                }
-            });
-        }
-    </script>     
 {% endif %} 

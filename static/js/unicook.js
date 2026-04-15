@@ -121,76 +121,109 @@ function ShowBunsuk(target)
    });
 }
 
-
-
 function ShowChart()
 {    
-    let counts = {}
-    let qtys   = {}
     $.ajax({
     	url : "/mixed.do",
     	type : "get",
     	dataType: "json",
     	async : true,
-    	success : function(response) 
+    	success : function(res) 
     	{
-        	counts = response.counts
-        	qtys   = response.qtys
-    	},
+        	const item_names = res.map(item => item.item_name);
+            const freqs = res.map(item => item.freq);
+            const qtys = res.map(item => item.qty);
+            
+            // Chart.js 적용
+            const ctx = document.getElementById('mixedChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: item_names, // X축: 상품이름
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '구매량',
+                            data: qtys, 
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',  // 한식 (빨강)
+                                'rgba(54, 162, 235, 0.6)', // 중식 (파랑)
+                                'rgba(255, 206, 86, 0.6)', // 양식 (노랑)
+                                'rgba(75, 192, 192, 0.6)'  // 일식 (초록)
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1,
+                            yAxisID: 'y_left',   // 왼쪽 Y축
+                        },
+                        {
+                            type: 'line',
+                            label: '구매 횟수',
+                            data: freqs, 
+                            fill: false,
+                            borderColor: 'rgb(54, 162, 235)',
+                            yAxisID: 'y_right',    // 오른쪽 Y축 사용
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        }
+                    },
+                    scales: {
+                        // 왼쪽 Y축 설정 (구매량용)
+                        y_left: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '구매량 (개)' },
+                            beginAtZero: true,
+                            min: 0,
+                            max: 30
+                        },
+                        // 오른쪽 Y축 설정 (구매횟수용)
+                        y_right: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '구매횟수 (건)' },
+                            beginAtZero: true,
+                            min: 0,
+                            max: 10,
+                            grid: {
+                                drawOnChartArea: false // 왼쪽 축의 그리드만 남김
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                // value: 눈금 값, index: 눈금이 몇번째인지, ticks: 모든 눈금 객체들의 배열
+                                callback: function(value, index, ticks) {
+                                // value가 대부분 숫자로 들어오기 때문에 getLabelForValue 사용
+                                const label = this.getLabelForValue(value);
+                                if (label.length > 5) {
+                                    return label.substring(0, 5) + '..';
+                                }
+                                return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        
+        },
     	error : function(request, status, error) 
     	{
         	alert("실패");
     	}
-    });
-    
-    // 1. 레이더 차트 그리기
-    const ctx = document.getElementById('mixedChart').getContext('2d');
-    new Chart(ctx, {
-        data: {
-            labels: {{ labels | tojson }},
-            datasets: [
-                {
-                    type: 'bar', // 막대 그래프: 구매량
-                    label: '총 구매량 (Qty)',
-                    data: {{ qtys | tojson }},
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgb(54, 162, 235)',
-                    borderWidth: 1,
-                    yAxisID: 'y_qty', // 왼쪽 축 사용
-                },
-                {
-                    type: 'line', // 선 그래프: 구매 횟수
-                    label: '구매 횟수 (Freq)',
-                    data: {{ counts | tojson }},
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderWidth: 3,
-                    fill: false,
-                    tension: 0.3, // 선을 부드럽게
-                    yAxisID: 'y_freq', // 오른쪽 축 사용
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y_qty: { // 왼쪽 Y축 (구매량)
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: { display: true, text: '구매량 (Units)' },
-                    beginAtZero: true
-                },
-                y_freq: { // 오른쪽 Y축 (구매 횟수)
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: { display: true, text: '구매 횟수 (Times)' },
-                    beginAtZero: true,
-                    grid: { drawOnChartArea: false }, // 격자선 중복 방지
-                }
-            }
-        }
     });
 }
 

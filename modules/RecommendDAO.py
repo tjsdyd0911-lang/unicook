@@ -509,7 +509,7 @@ class RecommendDAO  :
                 sql += f"('{target_user_id}','{code}','{score}','{algo_type}') "
                 #print(sql)
                 db.RunSQL(sql)         
-        print(ndf)
+        
         return ndf
 
     def UpdateRecommand(self,userid) :

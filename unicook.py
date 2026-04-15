@@ -318,22 +318,16 @@ def mixed() :
     user_id = session["login"]["id"] 
     
     dao = BuyDAO()
-    counts, qtys = dao.GetChartData(user_id)
-    counts_dict = [
+    items = dao.GetChartData(user_id)
+    dict_list = [
         {
             "item_name": vo.item_name, 
-            "count": vo.count, 
-        } for vo in counts
+            "freq": vo.count, 
+            "qty": vo.qty
+        } for vo in items
     ]
     
-    qtys_dict = [
-        {
-            "item_name": vo.item_name, 
-            "qty": vo.qty, 
-        } for vo in qtys
-    ]
-
-    return jsonify(counts = counts_dict, qtys = qtys_dict)
+    return jsonify(dict_list)
 
 # 로그인 시 장바구니에 담긴 상품 갯수 조회를 헤더에 항상 표시하기 위한 함수
 # @app.context_processor -> 공통 데이터 담당 (항상 표시해야될 데이터에 사용)

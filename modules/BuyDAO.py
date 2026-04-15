@@ -65,47 +65,31 @@ class BuyDAO :
         """
         구매 횟수 및 구매 수량 목록 조회 (상품 정보 포함)
         """
-        count_list = []
-        qty_list   = []
+        items = []
         with DBManager() as db :
             # buy 테이블(b)과 item 테이블(i)을 code 기준으로 조인
-            # 구매 횟수 구하는 구문
+            # 상품이름, 구매 횟수, 구매량 구하는 구문
             sql  = "select i.item_name as item_name, "
-            sql += "count(select count(i.item_name) "
-            sql += "from buy b join item i on b.code = i.code "
-            sql += "where id='{id}') as count "
+            sql += "count(*) as freq, sum(b.qty) as qty "
             sql += "from buy b "
             sql += "join item i on b.code = i.code "
+            sql += "join score s on b.code = s.code "
             sql += f"where b.id = '{id}' "
-            sql += "group by i.item_name"
-            sql += "order by count desc " 
+            sql += "and s.algo_type = 'best' "
+            sql += "group by i.item_name "
+            sql += "order by freq desc, qty desc "  
+            sql += "limit 4 "
             
-            count = db.Select(sql)
-            for n in range(count) :
+            list = db.Select(sql)
+            for n in range(list) :
                 vo = BuyVO()
                 vo.item_name   = db.GetValue(n, "item_name")
-                vo.count       = db.GetValue(n, "count")
-                
-                count_list.append(vo)
-            
-            # buy 테이블(b)과 item 테이블(i)을 code 기준으로 조인
-            # 구매 수량 구하는 구문
-            sql  = "select i.item_name as item_name, sum(b.qty) as qty "
-            sql += "from buy b "
-            sql += "join item i on b.code = i.code "
-            sql += f"where b.id = '{id}' "
-            sql += "group by i.item_name"
-            sql += "order by qty desc "
-        
-            qty = db.Select(sql)
-            for n in range(qty) :
-                vo = BuyVO()
-                vo.item_name   = db.GetValue(n, "item_name")
+                vo.count       = db.GetValue(n, "freq")
                 vo.qty         = db.GetValue(n, "qty")
                 
-                qty_list.append(vo)
-        
-        return count_list, qty_list
+                items.append(vo)
+                
+        return items
 
 
 

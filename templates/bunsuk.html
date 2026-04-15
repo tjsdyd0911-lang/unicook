@@ -1,34 +1,184 @@
 <!----------- main ----------->
 {% if target == "main" %}
-    <!-- [Modal] 분석 리포트 팝업 -->
-    <div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content p-4">
-                <div class="modal-header border-0 px-0">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>개인별 식단 분석 리포트</h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body bg-white rounded-3 p-4 mt-2 border">
-                    <div class="row align-items-center mb-4 text-center">
-                        <div class="col-md-6 text-start">
-                            <h6 class="fw-bold mb-3">지난 달 나의 주문 통계</h6>
-                            <p class="small text-muted mb-1">가장 많이 찾은 카테고리: <strong>#밀키트 #샌드위치</strong></p>
-                            <p class="small text-muted">평균 섭취 칼로리: <strong>약 1,150kcal / 끼</strong></p>
-                        </div>
-                        <div class="col-md-6">
-                           <canvas id="myPieChart"></canvas>
+
+<!-- [Modal] 분석 리포트 팝업 -->
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">
+                    {% if check_id %}
+                        <i class="bi bi-cpu-fill text-primary"></i> 개인화 SVD 알고리즘 분석 리포트
+                    {% else %}
+                        <i class="bi bi-clock-fill text-success"></i> 시간대별 실시간 인기 리포트
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <!-- 왼쪽: 차트 영역 -->
+                    <div class="col-md-7">
+                        <h6 class="fw-bold mb-3">
+                            <i class="bi bi-bar-chart-line"></i> 
+                            {% if check_id %}추천 적합도 (Correlation Score){% else %}시간대별 구매 비중{% endif %}
+                        </h6>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="similarityChart"></canvas>
                         </div>
                     </div>
-                    <div class="p-3 bg-light rounded text-center mt-3">
-                        <p class="mb-0"><strong>UniCook AI 추천:</strong> 저녁에는 소화가 잘 되는 <span class="text-success fw-bold">단백질 샐러드</span> 어떠신가요?</p>
+
+                    <!-- 오른쪽: 설명 영역 -->
+                    <div class="col-md-5">
+                        <!-- 분석 원리 -->
+                        <div class="p-3 mb-3 bg-light rounded border">
+                            <small class="text-muted d-block mb-1">분석 알고리즘</small>
+                            {% if check_id %}
+                                <strong class="text-primary">하이브리드 SVD 취향 분석</strong>
+                                <p class="small mt-2 mb-0">
+                                    고객님의 <b>구매 이력</b>과 상품의 <b>5가지 식품 카테고리(유형)</b>를
+                                    입체적으로 분석하여, 현재 시간대( <b>{{ slot_range }}시</b> )에 가장
+                                    적합한 메뉴를 제안합니다.
+                                </p>
+                            {% else %}
+                                <strong class="text-success">실시간 타임슬롯 분석</strong>
+                                <p class="small mt-2 mb-0">
+                                    {% set slot_kr = {'morning': '아침', 'lunch': '점심', 'dinner': '저녁', 'night': '심야'} %}
+                                    현재 시간대(<strong> {{ slot_kr.get(slot, slot) }} </strong>)에 
+                                    다른 고객들이 가장 많이 구매한 인기 상품군을 집계했습니다.
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- 분석 결과 세부사항 -->
+                        <div class="p-3 bg-light rounded border">
+                            <small class="text-muted d-block mb-1">데이터 기반 인사이트</small>
+                            <ul class="list-unstyled small mb-0">
+                                {% if check_id %}
+                                    <li class="mb-1">📊 <strong>선호 점수 :</strong><br>구매 빈도 + 수량 + 로그 보정</li>
+                                    <li class="mb-1">🎯 <strong>특징 학습 :</strong> 5가지 카테고리 반영</li>
+                                    <li class="mb-1">🔍 <strong>분석 차원 :</strong> 잠재 취향 성분 {{ n_components if n_components else 12 }}개 압축</li>
+                                    <li>✨ <strong>정교함 :</strong><br>동일 카테고리 내 유사 아이템 우선순위</li>
+                                {% else %}
+                                    <li class="mb-1">🕒 <strong>분석 시간 :</strong> {{ slot_range }}시 기준</li>
+                                    <li class="mb-1">📈 <strong>집계 데이터 :</strong> 최근 30일간 실시간 판매량</li>
+                                    <li>🚀 <strong>상태 :</strong> 현재 가장 반응이 뜨거운 상품</li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 px-0 mt-3">
-                    <button type="button" class="btn btn-sand px-5 py-2 mx-auto" data-bs-dismiss="modal">확인 완료</button>
+
+                <!-- 하단 요약 문구 -->
+                <div class="mt-4 p-3 rounded text-center border-start border-4 border-primary" style="background: #f8f9fa;">
+                    {% if check_id %}
+                        추천된 상품들은 고객님의 <strong>기존 구매 성향 및 선호 카테고리와
+                        <span id="avg-score-display">0</span></strong>% 일치합니다.
+                    {% else %}
+                        {% set slot_kr = {'morning': '아침', 'lunch': '점심', 'dinner': '저녁', 'night': '심야'} %}
+                        현재 <strong>{{ slot_kr.get(slot, slot) }} </strong>시간대에
+                        유니쿡 고객들이 가장 많이 선택한 검증된 인기 상품입니다.
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let similarityChart = null;
+
+    $('#analysisModal').on('shown.bs.modal', function () {
+        
+        const rawData = {{ (time_data if time_data is defined else []) | tojson }};
+        const isMember = {{ 'true' if check_id else 'false' }};
+        
+        if (rawData.length === 0) return;
+
+        // const itemNames = rawData.map(item => item.item_name); 아래 함수 선언과 같음
+        var itemNames = rawData.map(function(item) {
+            return item.item_name;
+        });
+        
+        // const scores = rawData.map(item => item.score); 아래 함수 선언과 같음
+        var scores = rawData.map(function(item) {
+            return item.score;
+        });
+
+        const ctx = document.getElementById('similarityChart').getContext('2d');
+        if (similarityChart !== null) {
+            similarityChart.destroy();
+        }
+
+        similarityChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: itemNames,
+                datasets: [{
+                    label: isMember ? '취향 매칭 점수' : '실시간 인기 점수',
+                    data: scores,
+                    backgroundColor: [
+                        'rgba(95, 0, 128, 0.7)',
+                        'rgba(13, 110, 253, 0.7)',
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(0, 0, 0, 0.5)',
+                        'rgba(0, 0, 0, 0.5)',
+                        'rgba(0, 0, 0, 0.5)',
+                        'rgba(0, 0, 0, 0.5)'
+                    ],
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend:  { display: false },
+                    tooltip: { 
+                        callbacks: {
+                            label: function(context) {
+                                    return ' 매칭 점수: ' + (context.raw * 100).toFixed(1) + '%';
+                                   }       
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 1.0,
+                        grid: { display: false },
+                        ticks: {
+                            callback: function(value) { return (value * 100) + '%'; }
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (isMember && scores.length > 0) {
+        
+            // const avg = (scores.reduce((a, b) => a + b, 0) / scores.length) * 100; 아래 함수와 같음
+            var sum = scores.reduce(function(a, b) {
+                return a + b;
+            }, 0);
+            var avg = (sum / scores.length) * 100;
+            
+            $('#avg-score-display').text(avg.toFixed(1));
+        }
+    });
+});
+</script>
+    <!--
     <script>
     var chartInstance = null;
     ShowChart();
@@ -79,7 +229,8 @@
                 }
             });
         }
-    </script>    
+    </script>
+    -->
 {% endif %}
 
 <!----------- mainsub ----------->

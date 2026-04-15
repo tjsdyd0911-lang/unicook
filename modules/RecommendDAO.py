@@ -1,8 +1,11 @@
 """
 상품추천 처리 클래스
 """
+import joblib
+import os
 import pandas as pd
 import numpy as np
+from datetime import datetime
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 
@@ -548,11 +551,335 @@ class RecommendDAO  :
                 item.append(vo)
         return item
     
+    def GetTimeSlotRecommend(self) :
+        sql = """
+        select 
+            case 
+                when hour(b.btime) >= 6 and hour(b.btime) < 11 then 'morning'
+                when hour(b.btime) >= 11 and hour(b.btime) < 16 then 'lunch'
+                when hour(b.btime) >= 16 and hour(b.btime) < 21 then 'dinner'
+                else 'night'
+            end as time_slot,
+            i.code,
+            i.item_name,
+            i.image,
+            i.price,
+            count(*) as count
+        from buy b
+        join item i on b.code = i.code
+        where btime > date_sub(now(), interval 30 day)
+        group by time_slot, i.code, i.item_name, i.image, i.price
+        order by time_slot, count desc
+        """
+        
+        try :
+            with DBManager() as db :
+                ranking_df = pd.read_sql(sql, db.con)
+            now_hour = datetime.now().hour
+        except Exception as e:
+            print(f"데이터 분석 중 오류 발생: {e}")
+            return [], "error", "0-0"
+        
+        if 6 <= now_hour < 11 : 
+            slot, slot_range = "morning", "6 - 10"
+        elif 11 <= now_hour < 17 : 
+            slot, slot_range = "lunch",   "11 - 16"
+        elif 17 <= now_hour < 21 : 
+            slot, slot_range = "dinner",  "17 - 20"
+        else : 
+            slot, slot_range = "night",   "21 - 5"
+        
+        top_data = ranking_df[ranking_df["time_slot"] == slot].head(4).copy()
+        
+        if not top_data.empty:
+            
+            max_count = top_data["count"].max()
+            
+            if max_count > 0:
+                top_data["score"] = top_data["count"] / max_count
+            else:
+                top_data["score"] = 0
+            
+            top_data["price"] = [int(i) for i in top_data["price"]]
+            
+            return top_data.to_dict('records'), slot, slot_range
+        else:
+            return [], slot, slot_range
+
+    def get_items_category(self, category) :
+        sql = """
+        select
+            i.code, i.item_name, i.image, i.price, count(*) as count
+        from buy b
+        join item i on b.code = i.code
+        where i.category = %s
+        group by i.code, i.item_name, i.image, i.price
+        order by count desc
+        limit 4
+        """
+        try :
+            with DBManager() as db :
+                items_df = pd.read_sql(sql, db.con, params=(category,))
+            if not items_df.empty : 
+                items_df["price"] = [int(i) for i in items_df["price"]]
+                return items_df.to_dict('records')
+            return []
+        except Exception as e :
+            print(f"카테고리별 상품 추천 중 오류 {e}")
+            return []
+
+
+
+    def GetAiRecommend(self, target_id, n_components=12, algo_type = "main") :
+        
+        now_hour = datetime.now().hour
+        if 6 <= now_hour < 11 :
+            slot, t_range, slot_range = "morning",(6, 10),  "6 - 10"
+        elif 11 <= now_hour < 17 :
+            slot, t_range, slot_range = "lunch",  (11, 16), "11 - 16"
+        elif 17 <= now_hour < 21 :
+            slot, t_range, slot_range = "dinner", (17, 20), "17 - 20"
+        else:
+            slot, t_range, slot_range = "night",  (21, 5),  "21 - 5"
+        
+        sql = f"""
+        select
+            b.id, b.code, i.category, u.age,
+            case when u.gender = '남자' then 0 else 1 end as gender,
+            count(*) as count, sum(b.qty) as qty
+        from buy b
+        join item i on b.code = i.code
+        join user u on b.id = u.id
+        where hour(b.btime) between {t_range[0]} and {t_range[1]}
+        group by b.id, b.code, i.category, u.age, u.gender
+        """
+        
+        try :
+            with DBManager() as db :
+                
+                df = pd.read_sql(sql, db.con)
+                
+                if not target_id :
+                    return self.GetTimeSlotRecommend()
+                    
+                df["code"] = df["code"].astype(str)
+                # 구매 건수 + 구매 수량(구매 수량은 로그화 시켜 한명이 대량 구매한 부분을 모두 반영하지 않음)
+                df["pref_score"] = df["count"] + np.log1p(df["qty"])
+
+                # 행렬 생성
+                user_item_matrix = df.pivot_table(index = "code", columns = "id", values = "pref_score", fill_value = 0)
+                
+                # 카테고리 정보 추가
+                # 각 아이템이 어떤 카테고리에 속하는지 원-핫 인코딩으로 추가
+                item_categories = df[['code', 'category']].drop_duplicates().set_index('code')
+                category_dummies = pd.get_dummies(item_categories['category'], prefix='cat')
+
+                # 행렬 합치기
+                # 구매 기록 행렬 + 카테고리(원-핫 인코딩)
+                enhanced_matrix = pd.concat([user_item_matrix, category_dummies], axis=1).fillna(0)
+
+                # 해당 유저의 최고 선호 아이템 찾기
+                user_history = df[df["id"] == target_id].sort_values(by = "pref_score", ascending=False)
+                
+                # 구매기록이 없거나 데이터 너무 적으면 비회원 분석
+                if user_history.empty or user_item_matrix.shape[1] <= 1:
+                    return self.GetTimeSlotRecommend()
+                
+                # SVD 성분 수 조절 (데이터보다 성분수가 많으면 오류 발생 방지)
+                current_n = min(n_components, enhanced_matrix.shape[0] - 1, enhanced_matrix.shape[1] - 1)
+                
+                if current_n < 1: current_n = 1
+                
+                svd = TruncatedSVD(n_components=current_n, random_state=42)
+                matrix_reduced = svd.fit_transform(enhanced_matrix)
+                
+                # 유사도 계산
+                corr = np.corrcoef(matrix_reduced)
+                item_ids = user_item_matrix.index.tolist()
+                
+                # 유저가 가장 좋아하는 상품 찾기
+                top_product_in_slot = str(user_history.iloc[0]["code"])
+                
+                if top_product_in_slot not in item_ids:
+                    return self.GetTimeSlotRecommend()
+                
+                target_idx = item_ids.index(top_product_in_slot)
+                similarities = corr[target_idx]
+                
+                recom_df = pd.DataFrame({
+                    "code"  : item_ids,
+                    "score" : similarities
+                })
+                
+                # 본인이 이미 산 제품 제외 후 상위 4개 추출
+                bought_list = user_history["code"].unique()
+                final_recom = recom_df[~recom_df["code"].isin(bought_list)].sort_values(by = "score", ascending = False).head(4).copy()
+                
+                if final_recom.empty:
+                    return self.GetTimeSlotRecommend()
+                
+                # 상품 상세 정보 추출
+                recom_codes = final_recom["code"].tolist()
+                codes_str = "', '".join(recom_codes)
+                
+                # 정보 가져오기
+                sql = f"select code, item_name, price, image from item where code in ('{codes_str}')"
+                info_count = db.Select(sql)
+                
+                info_list = []
+                
+                for i in range(info_count):
+                    info_list.append({
+                        "code"      : str(db.GetValue(i, "code")),
+                        "item_name" : db.GetValue(i, "item_name"),
+                        "price"     : db.GetValue(i, "price"),
+                        "image"     : db.GetValue(i, "image")
+                    })
+                
+                info_df = pd.DataFrame(info_list)
+                # 추천 결과와 상품 정보 병합
+                final_recom = pd.merge(final_recom, info_df, on="code", how="left")
+                
+                sql = f"delete from score where id = '{target_id}' and algo_type = '{algo_type}'"
+                db.RunSQL(sql)
+                
+                final_result = []
+                
+                for i in range(len(final_recom)):
+                    row = final_recom.iloc[i]
+                    code = row["code"]
+                    # 점수가 NaN일 경우 0으로 처리
+                    scr = round(float(row["score"]), 4) if not np.isnan(row["score"]) else 0.0
+                
+                    sql = f"""
+                    insert into score (id, code, score, algo_type)
+                    values ('{target_id}', '{row['code']}', {row['score']}, '{algo_type}')
+                    """
+                    db.RunSQL(sql)
+                    
+                    final_result.append({
+                        "code"      : code,
+                        "item_name" : row["item_name"],
+                        "price"     : int(row["price"]) if row["price"] else 0,
+                        "image"     : row["image"],
+                        "score"     : scr
+                    })
+                print(f"정보 보존율: {np.sum(svd.explained_variance_ratio_):.2%}")
+                return final_result, slot, slot_range
+                    
+        except Exception as e :
+            
+            print(f"시간대별 SVD 추천 중 오류 발생: {e}")
+            
+            return self.GetTimeSlotRecommend()
+
+    def CartAiRecommend(self, target_id, algo_type = "cart") :
+        
+        
+        id   = []
+        code = []
+        qty  = []
+        
+        with DBManager() as db :
+            # 구매내역 DB 가져오기
+            sql = "select id, code, qty from buy"
+            count = db.Select(sql)
+            for i in range(0, count) :
+                id.append(db.GetValue(i, "id"))
+                code.append(db.GetValue(i, "code"))
+                qty.append(db.GetValue(i, "qty"))
+            data = {
+                "id"   : id,
+                "code" : code,
+                "qty"  : qty
+            }
+            df_buys = pd.DataFrame(data)
+            
+            # 장바구니 DB 가져오기
+            sql  = "select id, code, qty from cart "
+            sql += f"where id = '{target_id}'"
+            count = db.Select(sql)
+            id   = []
+            code = []
+            qty  = []
+            for i in range(0, count) :
+                id.append(db.GetValue(i, "id"))
+                code.append(db.GetValue(i, "code"))
+                qty.append(db.GetValue(i, "qty"))
+        
+            data = {
+                "id"   : id,
+                "code" : code,
+                "qty"  : qty
+            }
+            df_cart = pd.DataFrame(data)
+            
+            # 기존 추천정보 삭제
+            sql  = "delete from score "
+            sql += "where id = '{target_id}' and algo_type = '{algo_type}'"
+            db.RunSQL(sql)
+            
+            # 데이터 전처리
+            df_buys = df_buys.copy()
+            df_buys["code"] = df_buys["copy"].astype(str)
+            df_cart = df_cart.copy()
+            df_cart["code"] = df_cart["code"].astype(str)
+            
+            # 사용자 - 상품 매트릭스 생성 (구매 여부 기반)
+            # 수량을 사용하거나, 단순히 샀으면 1, 안 샀으면 0으로 처리
+            user_item_matrix = df_buys.pivot_table(index = "id", columns = "code", values="qty", fill_value=0)
+            user_item_matrix = user_item_matrix.applymap(lambda x: 1 if x > 0 else 0)
+            
+            # 아이템 간 유사도 계산 (상품 간 코사인 유사도)
+            item_sim = cosine_similarity(user_item_matrix.T)
+            item_sim_df = pd.DataFrame(item_sim, index=user_item_matrix.columns, columns=user_item_matrix.columns)
+            
+            # 로그인 유저의 현재 장바구니 아이템 가져오기
+            current_cart_items = df_cart[df_cart["id"] == target_id]["code"].tolist()
+            
+            if not current_cart_items :
+                db.DBClose()
+                return "장바구니가 비어 있어 추천 불가"
+            
+            # 장바구니 아이템과 유사한 상품 점수 합계 구하기
+            # 장바구니 담긴 상품들이 다른 상품들과 갖는 유사도를 모두 더함
+            recom_scores = item_sim_df[current_cart_items].sum(axis = 1)
+            
+            # 결과값 데이터프레임 생성
+            recom_df = recom_scores.reset_index()
+            recom_df.columns = ["code", "score"]
+            
+            # 필터링 로직
+            # 이미 장바구니에 담긴 상품 제외
+            
+            exclude_items = set(current_cart_items)
+            
+            final_recom = recom_df[~recom_df["code"].isin(exclude_items)]
+            final_recom = final_recom.sort_values(by="score", ascending = False).head(4)
+            
+            final_recom["id"] = target_id
+            final_recom["algo_type"] = algo_type
+            final_recom["score"] = final_recom["score"].apply(lambda x: round(float(x), 4))
+            
+            ndf = final_recom[["id", "code", "score", "algo_type"]]
+            
+            # 기존 추천정보 등록
+            for i in range(0, len(ndf)) :
+                code  = ndf.iloc[i]["code"]
+                score = ndf.iloc[i]["score"]
+                sql  = "insert into score "
+                sql += "(id, code, score, algo_type) "
+                sql += "values "
+                sql += "('{target_id}','{code}', '{score}', '{algo_type}')"
+                db.RunSQL(sql)
+        return True
+            
+
 """
 target_user = "user_001"        
 dao = RecommendDAO()
 df = dao.MakePersonalBestRecommendations(target_user)
 print(df)
 """
-    
+
     

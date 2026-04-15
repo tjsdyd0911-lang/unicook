@@ -11,7 +11,6 @@ from modules.UserDAO import UserDAO
 from modules.ItemDAO import ItemDAO
 from modules.CartDAO import CartDAO
 from modules.BuyDAO  import BuyDAO
-from modules.TimeDAO import TimeDAO
 from modules.RecommendDAO import RecommendDAO
 
 app = Flask(__name__)
@@ -28,13 +27,19 @@ def add_header():
 
 @app.route("/")
 def main() :
+    
+    login_info = session.get("login")
+    id = login_info.get("id") if login_info else None
+    
+    time_dao  = RecommendDAO()
+    time_data, slot, slot_range = time_dao.get_ai_recommand(id)
+    
     current_page = request.args.get('page', 1, type=int)
     category = request.args.get("category", "0")
     dao = ItemDAO()
     total, items = dao.GetList(current_page, category)
     
-    time_dao  = TimeDAO()
-    time_data, slot = time_dao.time_analyze()
+    
     
     # 페이지 6개씩 구현
     total_pages = math.ceil(total / 16)
@@ -50,7 +55,8 @@ def main() :
                                         start_page   = start_page,
                                         end_page     = end_page,
                                         time_data    = time_data,
-                                        slot         = slot
+                                        slot         = slot,
+                                        slot_range   = slot_range
                                         )
 
 @app.route("/login.do")
@@ -215,6 +221,7 @@ def purchase():
     total = dao.GetCount(user_id, period)    
     buys  = dao.GetList(user_id, period, current_page, per_page)
     
+
     dao = RecommendDAO()
     reco_items = dao.RecommendItem(user_id, "best")
 
@@ -239,7 +246,8 @@ def purchase():
                            current_page=current_page,
                            start_page=start_page, 
                            end_page=end_page,
-                           reco_items = reco_items)
+                           reco_items=reco_items
+                           )
 
 # 구매 완료 처리
 @app.route("/purchase.do", methods=["POST"])
@@ -270,24 +278,24 @@ def purchaseadd():
         
     return "success"
 
-#추천 상품
 @app.route("/bunsuk.do")
 def bunsuk_main() :
+    
+    login_info = session.get("login")
+    id = login_info.get("id") if login_info else None
+    check_id = True if id else False
+    
+    time_dao  = RecommendDAO()
+    time_data, slot, slot_range = time_dao.get_ai_recommand(id)
+    
     target = request.args.get("target","main")
-    product_id = request.args.get("id","")
-    
-    dao = RecommendDAO()
-    if target == "purchase" :
-        #구매내역
-        userid = session["login"]["id"]
-        dao.MakePersonalBestRecommendations(userid, algo_type = "best")
-        total,items = dao.GetByUserFrequency(userid, n=4, algo_type = "best")
-        if int(total) > 0 :
-            return render_template("/bunsuk.html", target = target, total = total , items = items)     
-        else :
-            return "<div id='noItem' class='cart-card d-flex align-items-center'>추천 상품이 없습니다.</div>"        
-    
-    return render_template("bunsuk.html",target = target)
+    return render_template("bunsuk.html", 
+                           target     = target,
+                           check_id   = check_id,
+                           time_data  = time_data,
+                           slot       = slot,
+                           slot_range = slot_range
+                           )
     #return render_template(f"bunsuk_{target}.html",target = target)
 
 # 분석한 추천 상품
@@ -340,7 +348,7 @@ def info() :
     cart_data = cart_dao.GetList(id) if id else []
     
     return dict(cart={'cnt': len(cart_data)})
-
+    
 # main 함수
 if __name__ == "__main__" :
     app.run(port=8000)

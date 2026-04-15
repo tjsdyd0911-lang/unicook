@@ -16,7 +16,7 @@
                                 <div class="product-card">
                                     <img src="{{item.image}}">
                                     <div class="product-name">{{item.item_name}}</div>
-                                    <div class="product-price">{{item.price}}</div>
+                                    <div class="product-price">{{'{:,}'.format(item.price)}}원</div>
                                 </div>
                             </a>
                         </div>

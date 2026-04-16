@@ -15,49 +15,75 @@ from modules.BuyVO     import BuyVO
 
 
 class RecommendDAO  :    
-    def GetByFrequency(self,month,n) :
-        """
-        최근 1개월 구매이력을 이용한 추천
-        """
-        items = []
+    def GetByhit(self) :
         with DBManager() as db :
+            sql  = "select i.code, count(b.code) as total "
+            sql += "from item i "
+            sql += "left join buy b on b.code = i.code "
+            sql += "where b.btime >= date_sub(now(), interval 1 month) "
+            sql += "group by i.code, i.item_name, i.view "
+            sql += "order by code "
+            buy_month = db.Select(sql)
             
-            #전체 건수
-            sql  = "select count(product_id) as total "
-            sql += "from orders "
-            sql += f"where order_date  >= date_sub(now(), interval {month} month) "
-            db.Select(sql)
-            total  = int(db.GetValue(0,"total"))
+            code  = []
+            total = []
+            for n in range(buy_month) :
+                code.append(db.GetValue(n,"code"))
+                total.append(db.GetValue(n,"total"))
+                
+            buy_month = {
+                'code'  : code,
+                'total_1m' : total
+            }
             
-            #추천 상품
-            sql  = "select product_id,count(product_id) as count,"
-            sql += "(select name from product where product_id = orders.product_id) as name,"
-            sql += "(select price from product where product_id = orders.product_id) as price,"
-            sql += "(select weight from product where product_id = orders.product_id) as weight,"
-            sql += "(select category_id from product where product_id = orders.product_id) as category_id,"
-            sql += "(select category from product where product_id = orders.product_id) as category,"
-            sql += "(select image_url from product where product_id = orders.product_id) as image_url "
-            sql += "from orders "
-            sql += f"where order_date  >= date_sub(now(), interval {month} month) "
-            sql += "group by product_id "
-            sql += "order by count desc "
-            sql += f"limit 0,{ n } "
-            count = db.Select(sql)
-            for i in range(0,count) :
-                product_id  = db.GetValue(i,"product_id")
-                count  = db.GetValue(i,"count")            
-                name        = db.GetValue(i,"name")
-                price       = int(db.GetValue(i,"price"))
-                weight      = db.GetValue(i,"weight")
-                category_id = db.GetValue(i,"category_id")
-                category    = db.GetValue(i,"category")
-                image_url   = db.GetValue(i,"image_url")
-                data = { "product_id" : product_id, "count" : count,
-                        "name" : name , "price" : price, "weight" : weight,
-                        "category_id" : category_id, "category" : category,
-                        "image_url" : image_url}
-                items.append(data)
-        return total,items
+            df_buy_month = pd.DataFrame(buy_month)
+            
+            sql  = "select i.code, count(b.code) as total, i.view "
+            sql += "from item i "
+            sql += "left join buy b on b.code = i.code "
+            sql += "group by i.code, i.item_name, i.view "
+            sql += "order by code "
+            buy_view = db.Select(sql)
+            
+            code  = []
+            total = []
+            view  = []
+            for n in range(buy_view) :
+                code.append(db.GetValue(n,"code"))
+                total.append(db.GetValue(n,"total"))
+                view.append(db.GetValue(n,"view"))
+                
+            buy_view = {
+                'total_all' : total,
+                'view' : view
+            }
+            
+            df_buy_view = pd.DataFrame(buy_view)
+            
+            df_concat = pd.concat([df_buy_month, df_buy_view], axis=1)
+            
+            # 데이터 전처리: code를 문자열로 변환
+            df_concat = df_concat.copy()
+            df_concat['code'] = df_concat['code'].astype(str)
+        
+            # 가중치 점수 계산 (최근 인기템 지수)
+            # 최근 한달 구매수에 더 높은 가중치(0.7)를 두고 구매 전환율(전체 구매수 / 전체 조회수 * 0.3)을 더하여 최근 인기상품을 분석함.
+            df_concat['hit'] = (df_concat['total_1m'] * 0.7) + (df_concat['total_all'] / df_concat['view'] * 0.3)
+            
+            # 인기순(hit) 내림차순 정렬
+            df_concat = df_concat.sort_values(by='hit', ascending=False)
+        
+            # score 테이블 삽입위한 hit 값 소수점 4자리로 정리
+            df_concat['hit'] = df_concat['hit'].apply(lambda x: round(float(x), 4))
+            
+            # score 테이블 hit 컬럼 수정
+            for i in range(len(df_concat)) :
+                code = df_concat.iloc[i]["code"]
+                hit  = df_concat.iloc[i]["hit"]
+                sql  = "update item "
+                sql += f"set hit = {hit} "
+                sql += f"where code = {code} "
+                db.RunSQL(sql)
     
     def GetByUserFrequency(self, userid, n = 8, algo_type = "main"):
         """
@@ -840,7 +866,6 @@ class RecommendDAO  :
             current_cart_items = df_cart[df_cart["id"] == target_id]["code"].tolist()
             
             if not current_cart_items :
-                db.DBClose()
                 return "장바구니가 비어 있어 추천 불가"
             
             # 장바구니 아이템과 유사한 상품 점수 합계 구하기
@@ -885,7 +910,7 @@ class RecommendDAO  :
         with DBManager() as db :
             # buy 테이블(b)과 item 테이블(i)을 code 기준으로 조인
             # 상품이름, 구매 횟수, 구매량 구하는 구문
-            sql  = "select i.item_name as item_name, "
+            sql  = "select i.item_name, "
             sql += "count(*) as freq, sum(b.qty) as qty "
             sql += "from buy b "
             sql += "join item i on b.code = i.code "

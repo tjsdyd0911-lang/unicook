@@ -36,10 +36,14 @@ def main() :
     
     current_page = request.args.get('page', 1, type=int)
     category = request.args.get("category", "0")
-    dao = ItemDAO()
-    total, items = dao.GetList(current_page, category)
     
+    # 최근 1달 인기상품 분석
+    re_dao = RecommendDAO()
+    re_dao.GetByhit()
     
+    # 리스트 가져오기 실행
+    item_dao = ItemDAO()
+    total, items = item_dao.GetList(current_page, category)
     
     # 페이지 6개씩 구현
     total_pages = math.ceil(total / 16)
@@ -297,10 +301,22 @@ def bunsuk() :
                                slot       = slot,
                                slot_range = slot_range
                                )
+    
+    if target == "mainsub" :
+        mainsub_dao  = RecommendDAO()
+        mainsub_dao.CartAiRecommend(id, algo_type = "cart")
+        total, items = mainsub_dao.GetByUserFrequency(id, n=4, algo_type = "cart")
+        if int(total) > 0 :
+            return render_template("bunsuk_mainsub.html",
+                                   target = target,
+                                   total  = total,
+                                   items  = items
+                                   )
+    
     if target == "cart" :
-        re_dao = RecommendDAO()
-        re_dao.CartAiRecommend(id, algo_type = "cart")
-        total, items = re_dao.GetByUserFrequency(id, n=4, algo_type = "cart")
+        cart_dao = RecommendDAO()
+        cart_dao.CartAiRecommend(id, algo_type = "cart")
+        total, items = cart_dao.GetByUserFrequency(id, n=4, algo_type = "cart")
         if int(total) > 0 :
             return render_template("bunsuk_cart.html",
                                    target = target,

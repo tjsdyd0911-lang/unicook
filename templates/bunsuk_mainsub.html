@@ -1,32 +1,149 @@
 <!----------- mainsub ----------->
 {% if target == "mainsub" %}
-    <!-- [Modal] 분석 리포트 팝업 -->
-    <div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
+    <style>
+    .algo-box { background: #f0ede9; border-radius: 10px; padding: 15px; font-size: 0.85rem; line-height: 1.6; }
+    </style>
+    <div class="modal fade" id="analysisModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content p-4">
-                <div class="modal-header border-0 px-0">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>관련 카테고리 주문 통계</h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">📉 개인별 최애 상품 TOP4 분석 리포트</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="ShowItem();"></button>
                 </div>
-                <div class="modal-body bg-white rounded-3 p-4 mt-2 border">
-                    <div class="row align-items-center mb-4 text-center">
-                        <div class="col-md-6 text-start">
-                            <h6 class="fw-bold mb-3">관련 카테고리 주문 통계</h6>
-                            <p class="small text-muted mb-1">가장 많이 찾은 카테고리: <strong>#밀키트 #샌드위치</strong></p>
-                            <p class="small text-muted">평균 섭취 칼로리: <strong>약 1,150kcal / 끼</strong></p>
+                <div class="modal-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h5>📊 {{ session.login.name }}님의 쇼핑 성향 분석</h5>
+                                <div class="chart-wrapper" style="height: 250px; width: 100%;">
+                                    <canvas id="mixedChart"></canvas>
+                                </div>
                         </div>
-                        <div class="col-md-6">
-                            <i class="fa-solid fa-chart-pie fa-5x text-warning opacity-50"></i>
+                        <div class="col-md-5">
+                            <div class="algo-box mb-3">
+                                <strong>💡 분석 원리 (가중치 점수)</strong><br>
+                                빈도와 수량을 <span class="text-danger">가중치를 두어(빈도 * 0.7) + (수량 * 0.3)</span>상품의 충성도와 기여도를 복합 차트로 추출했습니다.
+                            </div>
+                            <div class="algo-box">
+                                <strong>📈 분석 결과</strong><br>
+                                재 구매할 확률이 가장 높은 상품군입니다. <br>
+                            </div>
                         </div>
                     </div>
-                    <div class="p-3 bg-light rounded text-center mt-3">
-                        <p class="mb-0"><strong>UniCook AI 추천:</strong> 저녁에는 소화가 잘 되는 <span class="text-success fw-bold">단백질 샐러드</span> 어떠신가요?</p>
+                    <div class="mt-4 p-3 rounded text-center" style="background: var(--kurly-beige);">
+                        전체 구매한 상품 중 <strong>가장 높은 점수</strong>를 가진 상위 4개 아이템을 도출했습니다.
                     </div>
-                </div>
-                <div class="modal-footer border-0 px-0 mt-3">
-                    <button type="button" class="btn btn-sand px-5 py-2 mx-auto" data-bs-dismiss="modal">확인 완료</button>
                 </div>
             </div>
         </div>
-    </div>
+    </div>  
 {% endif %}
+<script>
+
+ShowChart();
+
+function ShowChart()
+{    
+    $.ajax({
+    	url : "/mixed.do",
+    	type : "get",
+    	dataType: "json",
+    	async : true,
+    	success : function(res) 
+    	{
+        	const item_names = res.map(item => item.item_name);
+            const freqs = res.map(item => item.freq);
+            const qtys = res.map(item => item.qty);
+            
+            // Chart.js 적용
+            const ctx = document.getElementById('mixedChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: item_names, // X축: 상품이름
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '구매량',
+                            data: qtys, 
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 206, 86, 0.6)',
+                                'rgba(75, 192, 192, 0.6)'  
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1,
+                            yAxisID: 'y_left',   // 왼쪽 Y축
+                        },
+                        {
+                            type: 'line',
+                            label: '구매 횟수',
+                            data: freqs, 
+                            fill: false,
+                            borderColor: 'rgb(54, 162, 235)',
+                            yAxisID: 'y_right',    // 오른쪽 Y축 사용
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        }
+                    },
+                    scales: {
+                        // 왼쪽 Y축 설정 (구매량용)
+                        y_left: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '구매량 (개)' },
+                            beginAtZero: true,
+                            min: 0,
+                            max: 70
+                        },
+                        // 오른쪽 Y축 설정 (구매횟수용)
+                        y_right: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '구매횟수 (건)' },
+                            beginAtZero: true,
+                            min: 0,
+                            max: 20,
+                            grid: {
+                                drawOnChartArea: false // 왼쪽 축의 그리드만 남김
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                // value: 눈금 값, index: 눈금이 몇번째인지, ticks: 모든 눈금 객체들의 배열
+                                callback: function(value, index, ticks) {
+                                // value가 대부분 숫자로 들어오기 때문에 getLabelForValue 사용
+                                const label = this.getLabelForValue(value);
+                                if (label.length > 5) {
+                                    return label.substring(0, 5) + '..';
+                                }
+                                return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        
+        },
+    	error : function(request, status, error) 
+    	{
+        	alert("실패");
+    	}
+    });
+}
+</script>

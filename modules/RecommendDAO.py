@@ -552,7 +552,7 @@ class RecommendDAO  :
                 vo.price     = f"{db.GetValue(n, 'price'):,}원"
                 item.append(vo)
         return item
-    
+    # 비회원 시간대별 상품 분석 및 추천
     def GetTimeSlotRecommend(self) :
         sql = """
         select 
@@ -607,31 +607,7 @@ class RecommendDAO  :
             return top_data.to_dict('records'), slot, slot_range
         else:
             return [], slot, slot_range
-
-    def get_items_category(self, category) :
-        sql = """
-        select
-            i.code, i.item_name, i.image, i.price, count(*) as count
-        from buy b
-        join item i on b.code = i.code
-        where i.category = %s
-        group by i.code, i.item_name, i.image, i.price
-        order by count desc
-        limit 4
-        """
-        try :
-            with DBManager() as db :
-                items_df = pd.read_sql(sql, db.con, params=(category,))
-            if not items_df.empty : 
-                items_df["price"] = [int(i) for i in items_df["price"]]
-                return items_df.to_dict('records')
-            return []
-        except Exception as e :
-            print(f"카테고리별 상품 추천 중 오류 {e}")
-            return []
-
-
-
+    # 회원 시간대별 상품 분석 및 추천
     def GetAiRecommend(self, target_id, n_components=12, algo_type = "main") :
         
         now_hour = datetime.now().hour
@@ -766,7 +742,6 @@ class RecommendDAO  :
                         "image"     : row["image"],
                         "score"     : scr
                     })
-                print(f"정보 보존율: {np.sum(svd.explained_variance_ratio_):.2%}")
                 return final_result, slot, slot_range
                     
         except Exception as e :
@@ -776,7 +751,6 @@ class RecommendDAO  :
             return self.GetTimeSlotRecommend()
 
     def CartAiRecommend(self, target_id, algo_type = "cart") :
-        
         
         id   = []
         code = []
@@ -830,7 +804,7 @@ class RecommendDAO  :
             # 사용자 - 상품 매트릭스 생성 (구매 여부 기반)
             # 수량을 사용하거나, 단순히 샀으면 1, 안 샀으면 0으로 처리
             user_item_matrix = df_buys.pivot_table(index = "id", columns = "code", values="qty", fill_value=0)
-            user_item_matrix = user_item_matrix.applymap(lambda x: 1 if x > 0 else 0)
+            user_item_matrix = user_item_matrix.map(lambda x: 1 if x > 0 else 0)
             
             # 아이템 간 유사도 계산 (상품 간 코사인 유사도)
             item_sim = cosine_similarity(user_item_matrix.T)
@@ -864,7 +838,6 @@ class RecommendDAO  :
             final_recom["score"] = final_recom["score"].apply(lambda x: round(float(x), 4))
             
             ndf = final_recom[["id", "code", "score", "algo_type"]]
-            
             # 기존 추천정보 등록
             for i in range(0, len(ndf)) :
                 code  = ndf.iloc[i]["code"]
@@ -872,7 +845,7 @@ class RecommendDAO  :
                 sql  = "insert into score "
                 sql += "(id, code, score, algo_type) "
                 sql += "values "
-                sql += f"('{target_id}','{code}', '{score}', '{algo_type}')"
+                sql += f"('{target_id}',{code}, {score}, '{algo_type}')"
                 db.RunSQL(sql)
                 
             return ndf

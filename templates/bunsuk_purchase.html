@@ -38,7 +38,11 @@
     </div>    
 {% endif %} 
 <script>
-
+$(document).off("keydown").on("keydown", function(e) {
+    if (e.key == "Escape" || e.keyCode == 27) {
+        ShowItem("purchase");
+    }
+});
 ShowChart();
 
 function ShowChart()

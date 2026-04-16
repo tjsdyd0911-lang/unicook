@@ -31,7 +31,7 @@
                             </div>
                         </div>
                     </div>
-    
+                    
                     {% if items %}
                     <div id="analysisSummary" class="p-3 mt-4 rounded-3" style="background-color: #eee;">
                         <strong>UniCook AI 분석:</strong> 
@@ -45,6 +45,9 @@
         </div>
     </div>
     <script>
+        $(document).ready(function(){
+            ShowItem("cart");
+        })
         const pref = { 
             {% for item in items %}
             "{{ item.name }}": {{ item.score }},
@@ -53,36 +56,35 @@
         
         let currentChart = null;
         
-        $('#analysisModal').on('shown.bs.modal', function () {
-    
-            function openAnalysisReport() {
-                const modalElement = $("#analysisModal");
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-                
-                const ctx = $("#categoryChart").getContext("2d");
-                
-                // 기존 차트가 있다면 파괴 (중복 생성 방지)
-                if (currentChart) {
-                    currentChart.destroy();
-                }
-        
-                currentChart = new Chart(ctx, {
-                    type: "pie",
-                    data: {
-                        labels: Object.keys(pref),
-                        datasets: [{
-                            data: Object.values(pref),
-                            backgroundColor: ['#8B6E4E', '#A68B6D', '#C9B7A2', '#E5DDD3', '#D2B48C']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });         
+        function renderChart() {
+            
+            const canvas = $("#categoryChart")[0];
+            
+            const ctx = canvas.getContext("2d");
+            
+            // 기존 차트가 있다면 파괴 (중복 생성 방지)
+            if (currentChart) {
+                currentChart.destroy();
             }
+    
+            currentChart = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: Object.keys(pref),
+                    datasets: [{
+                        data: Object.values(pref),
+                        backgroundColor: ['#8B6E4E', '#A68B6D', '#C9B7A2', '#E5DDD3', '#D2B48C']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });         
+        }
         
+        $('#analysisModal').on('shown.bs.modal', function () {
+            renderChart();
         });
     </script>
 {% endif %}   

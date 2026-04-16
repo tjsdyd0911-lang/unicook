@@ -106,6 +106,7 @@ function ShowBunsuk(target)
    $.ajax({
    	url : "/bunsuk.do?target=" + target,
    	type : "get",
+   	data : {target : target},
    	async : true,
    	success : function(result) 
    	{
@@ -121,12 +122,13 @@ function ShowBunsuk(target)
 }
 
 
-function ShowItem() 
+function ShowItem(target) 
 {
     $.ajax({
     	url : "/recommend.do",
     	type : "get",
     	dataType: "json",
+    	data : {target : target},
     	async : true,
     	success : function(reco_dict) 
     	{

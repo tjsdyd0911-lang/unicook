@@ -149,8 +149,9 @@ function ShowItem(target)
                 `;
             });
             $('#reco_items').html(html);
-            
-            window.scrollTo(0, document.body.scrollHeight);
+            if(target == "purchase"){
+                window.scrollTo(0, document.body.scrollHeight);
+            }
     	},
     	error : function(request, status, error) 
     	{

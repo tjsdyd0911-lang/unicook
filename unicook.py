@@ -137,7 +137,6 @@ def cart() :
     cart_dao = CartDAO()
     cart_list = cart_dao.GetList(id) if id else []
     
-    
     return render_template("cart.html", cart_list=cart_list)
 
 # 장바구니 추가
@@ -328,6 +327,16 @@ def bunsuk(target = None) :
                                    total  = total,
                                    items  = items
                                    )
+    if target == "view" :
+        view_dao = RecommendDAO()
+        view_dao.MakePersonalBestRecommendations(id, algo_type = "view")
+        total,items = buy_dao.GetByUserFrequency(id, n=4, algo_type = "view")
+        if int(total) > 0 :
+            return render_template("/bunsuk_view.html",
+                                   target = target,
+                                   total  = total,
+                                   items  = items
+                                   )
     
     #return render_template(f"bunsuk_{target}.html",target = target)
 
@@ -368,7 +377,18 @@ def recommend() :
         ]
         return jsonify(reco_dict)
     
-
+    if target == "view" :
+        reco_items = dao.RecommendItem(id, "view")
+        reco_dict = [
+            {
+                "code": vo.code, 
+                "image": vo.image, 
+                "item_name": vo.item_name, 
+                "price": vo.price
+            } for vo in reco_items
+        ]
+        return jsonify(reco_dict)
+    
     return jsonify(reco_dict)
 
     

@@ -1,8 +1,6 @@
 """
 상품추천 처리 클래스
 """
-import joblib
-import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -590,6 +588,16 @@ class RecommendDAO  :
         return item
     # 비회원 시간대별 상품 분석 및 추천
     def GetTimeSlotRecommend(self) :
+        
+        """
+        '비회원' 시간대별 추천 알고리즘
+        유저가 처음에 홈페이지를 접속 시 현재 접속한 시간대에 가장 많이
+        판매된 상품을 기준으로 추천합니다.
+        현재 모든 회원의 구매내역 중 시간대별로 조회하여 그 시간대에
+        구매를 했다면 카운트하여 그 카운트한 상품 중 top4를 선정하여
+        화면에 출력합니다.
+        """
+        
         sql = """
         select 
             case 
@@ -645,6 +653,16 @@ class RecommendDAO  :
             return [], slot, slot_range
     # 회원 시간대별 상품 분석 및 추천
     def GetAiRecommend(self, target_id, n_components=12, algo_type = "main") :
+        
+        """
+        '회원' 시간대별 추천 알고리즘
+        시간대별 추천 + 사용자 구매이력(SVD) + 아이템 카테고리 결합 추천
+        현재 시간대에 구매한 데이터 필터링
+        구매 건수와 구매 수량(로그화)을 합산한 선호도 분석
+        유저 - 아이템 행렬에 카테고리(One-hot)를 결합하여 혹시 모를 데이터 희소성 문제 보완
+        Truncated SVD를 이용한 차원 축소 및 잠재 요인 추출
+        코사인 유사도 기반 최적 상품 도출
+        """
         
         now_hour = datetime.now().hour
         if 6 <= now_hour < 11 :
@@ -707,7 +725,7 @@ class RecommendDAO  :
                 svd = TruncatedSVD(n_components=current_n, random_state=42)
                 matrix_reduced = svd.fit_transform(enhanced_matrix)
                 
-                # 유사도 계산
+                # 코사인 유사도 계산
                 corr = np.corrcoef(matrix_reduced)
                 item_ids = user_item_matrix.index.tolist()
                 
@@ -788,6 +806,14 @@ class RecommendDAO  :
 
     def CartAiRecommend(self, target_id, algo_type = "cart") :
         
+        """
+        장바구니 기반 연관 상품 추천
+        전체 사용자의 구매 내역과 현재 유저의 현재 장바구니 상태 추출
+        유저 - 아이템 행렬을 생성하여 구매 여부+수량 기반 매트릭스 구축
+        아이템 간 코사인 유사도를 계산하여 상품 간 연관성 지수 도출
+        장바구니 내 여러 아이템과 가장 유사도가 높은 상위 상품군을 가중합 방식으로 선정
+        """
+        
         id   = []
         code = []
         qty  = []
@@ -838,9 +864,8 @@ class RecommendDAO  :
             df_cart["code"] = df_cart["code"].astype(str)
             
             # 사용자 - 상품 매트릭스 생성 (구매 여부 기반)
-            # 수량을 사용하거나, 단순히 샀으면 1, 안 샀으면 0으로 처리
             user_item_matrix = df_buys.pivot_table(index = "id", columns = "code", values="qty", fill_value=0)
-            user_item_matrix = user_item_matrix.map(lambda x: 1 if x > 0 else 0)
+            
             
             # 아이템 간 유사도 계산 (상품 간 코사인 유사도)
             item_sim = cosine_similarity(user_item_matrix.T)

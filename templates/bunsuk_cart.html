@@ -1,90 +1,93 @@
 <!----------- cart ----------->
-{% if target == "cart" %}
-    <div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered text-dark">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="analysisModalLabel">🔍 맞춤형 상품 추천 리포트</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-6 text-center">
-                            <h6 class="fw-bold">추천상품 유사도</h6>
-                            <div style="position: relative; height:300px; width:100%;">
-                                <canvas id="categoryChart"></canvas>
-                            </div>
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered text-dark">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="analysisModalLabel">🔍 맞춤형 상품 추천 리포트</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <h6 class="fw-bold">추천상품 유사도</h6>
+                        <div style="position: relative; height:300px; width:100%;">
+                            <canvas id="categoryChart"></canvas>
                         </div>
-                        <div class="col-md-6">
-                            <div id="userStats" class="mb-3">
-                                <h6 class="fw-bold">분석 방식: 사용자 기반 협업 필터링</h6>
-                                <p class="small text-muted">(Collaborative Filtering)</p>
-                                <p class="small">회원님과 취향이 비슷한 분들이 구매한 상품을 분석했습니다.</p>
-                            </div>
-                            <div class="recommendation-process p-3 rounded" style="background-color: #f8f9fa;">
-                                <h7 class="fw-bold text-primary">💡 추천 로직 상세</h7>
-                                <div class="small mt-2">
-                                    1. <strong>유사 그룹 매칭:</strong> 현재 사용자와 구매 이력이 가장 유사한 다른 사용자들을 찾습니다.<br>
-                                    2. <strong>아이템 도출:</strong> 그룹 내에서 사용자가 아직 구매하지 않은 인기 상품을 선별합니다.<br>
-                                    3. <strong>효과:</strong> 새로운 취향 발견 및 쇼핑 편의성 증대
-                                </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="userStats" class="mb-3">
+                            <h6 class="fw-bold">분석 방식: 사용자 기반 협업 필터링</h6>
+                            <p class="small text-muted">(Collaborative Filtering)</p>
+                            <p class="small">회원님과 취향이 비슷한 분들이 구매한 상품을 분석했습니다.</p>
+                        </div>
+                        <div class="recommendation-process p-3 rounded" style="background-color: #f8f9fa;">
+                            <h7 class="fw-bold text-primary">💡 추천 로직 상세</h7>
+                            <div class="small mt-2">
+                                1. <strong>유사 그룹 매칭:</strong> 현재 사용자와 구매 이력이 가장 유사한 다른 사용자들을 찾습니다.<br>
+                                2. <strong>아이템 도출:</strong> 그룹 내에서 사용자가 아직 구매하지 않은 인기 상품을 선별합니다.<br>
+                                3. <strong>효과:</strong> 새로운 취향 발견 및 쇼핑 편의성 증대
                             </div>
                         </div>
                     </div>
-                    
-                    {% if items %}
-                    <div id="analysisSummary" class="p-3 mt-4 rounded-3" style="background-color: #eee;">
-                        <strong>UniCook AI 분석:</strong> 
-                        [ {{ session["login"].name }} ] 회원님은 
-                        <strong>'{{ items[0].name }}'</strong> 상품과 
-                        코사인 유사도 <span class="text-primary fw-bold">{{ items[0].score }}</span>로 가장 높은 일치율을 보입니다.
-                    </div>
-                    {% endif %}
                 </div>
+                
+                {% if items %}
+                <div id="analysisSummary" class="p-3 mt-4 rounded-3" style="background-color: #eee;">
+                    <strong>UniCook AI 분석:</strong> 
+                    [ {{ session["login"].name }} ] 회원님은 
+                    <strong>'{{ items[0].name }}'</strong> 상품과 
+                    코사인 유사도 <span class="text-primary fw-bold">{{ items[0].score }}</span>로 가장 높은 일치율을 보입니다.
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-    <script>
-        $(document).ready(function(){
-            ShowItem("cart");
-        })
-        const pref = { 
-            {% for item in items %}
-            "{{ item.name }}": {{ item.score }},
-            {% endfor %}
-        };    
-        
-        let currentChart = null;
-        
-        function renderChart() {
-            
-            const canvas = $("#categoryChart")[0];
-            
-            const ctx = canvas.getContext("2d");
-            
-            // 기존 차트가 있다면 파괴 (중복 생성 방지)
-            if (currentChart) {
-                currentChart.destroy();
-            }
+</div>
+<script>
     
-            currentChart = new Chart(ctx, {
-                type: "pie",
-                data: {
-                    labels: Object.keys(pref),
-                    datasets: [{
-                        data: Object.values(pref),
-                        backgroundColor: ['#8B6E4E', '#A68B6D', '#C9B7A2', '#E5DDD3', '#D2B48C']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });         
-        }
+    items = [ 
+        {% for item in items %}
+        "{{ item.name }}",
+        {% endfor %}
+    ];
+    datas = [
+        {% for item in items %}
+        {{ item.score }},
+        {% endfor %}
+    ]
+    
+    currentChart = null;
+    
+    function renderChart() {
         
-        $('#analysisModal').on('shown.bs.modal', function () {
-            renderChart();
-        });
-    </script>
-{% endif %}   
+        const ctx = document.getElementById("categoryChart").getContext("2d");
+        
+        if (currentChart) currentChart.destroy();
+
+        currentChart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: items,
+                datasets: [{
+                    label : "연관 지수 (SVD Score)",
+                    data: datas,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)'  
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ]
+                }]
+            },
+        });         
+    }
+
+    renderChart();
+
+</script>

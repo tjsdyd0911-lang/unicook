@@ -1,0 +1,138 @@
+<!----------- mainsubY ----------->
+<style>
+.algo-box { background: #f0ede9; border-radius: 10px; padding: 15px; font-size: 0.85rem; line-height: 1.6; }
+</style>
+
+<div class="modal fade" id="analysisModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                    <h5 class="modal-title fw-bold">{{ session.login.name }}님과 유사한 성향 TOP10 회원 분석 리포트</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                            <div class="chart-wrapper" style="height: 500px; width: 100%;">
+                                    <canvas id="heatMap"></canvas>
+                            </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="algo-box mb-3">
+                            <strong>💡 분석 원리 (유사도 분석)</strong><br>
+                            회원님과<span class="text-danger"> 같은 성별과 비슷한 나이대 회원님들 간의 구매내역 유사도를 분석하였고</span> 유사도 상위 10명 간 
+                            <span class="text-danger">유사도 점수를 상품별 구매횟수에 곱해 가중치</span>를 히트맵으로 도출했습니다.
+                        </div>
+                        <div class="algo-box">
+                            <strong>📈 분석 결과</strong><br>
+                            진한 색상일수록 높은 가중치를 갖고있어, 회원님이 좋아하실만한 상품으로 추천드리고 있습니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 rounded text-center" style="background: var(--kurly-beige);">
+                    회원님과 같은 성별, 비슷한 나이대 회원님들 간의 <br>
+                    <strong>유사도를 통해 도출한 가중치</strong>를 <br>
+                    일부 10개 아이템으로 도출했습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
+ 
+<script>
+Showheat();
+
+function Showheat() {
+    $.ajax({
+       	url : "/heatmap.do",
+       	type : "get",
+       	dataType: "json",
+       	async : true,
+       	success : function(res) {
+           	console.log(res)	
+            const heatmapData = res.flatMap(row => {
+                // 유저 ID와 상품들을 분리한다.
+                const { id, ...products } = row; 
+                
+                // 남은 상품들(products)만 가지고 [상품명, 점수] 쌍의 배열을 만든다.
+                // Object.entries(products) 실행 결과 -> [ ["애슐리 치킨", 5], ["통등심 돈까스", 8], ... ]
+                const itemEntries = Object.entries(products);
+                
+                // 3. 이 배열을 돌면서 Chart.js가 원하는 {x, y, v} 형태로 변환한다.
+                return itemEntries.map(([item_name, score]) => {
+                    return {
+                        x: item_name, // 상품명 (X축)
+                        y: id,        // 유저 ID (Y축)
+                        v: score      // 유사도 (값)
+                    };
+                });
+            });
+           
+            // 차트 축(Scale)을 위해 고유한 상품명과 유저 ID 리스트 추출
+            const allItems = [...new Set(heatmapData.map(d => d.x))];
+            const allUsers = [...new Set(heatmapData.map(d => d.y))];
+        
+            // 3. 차트에 변수(heatmapData) 넣기
+            const ctx = document.getElementById('heatMap').getContext('2d');
+            new Chart(ctx, {
+                type: 'matrix',
+                data: {
+                    datasets: [{
+                        label: '타회원 유사도 히트맵',
+                        data: heatmapData,
+                       
+                        // 색상 및 스타일 설정
+                        backgroundColor(context) {
+                            const value = context.dataset.data[context.dataIndex].v;
+                            const alpha = value / 10; // 점수 범위에 따라 분모 조절 (예: 0~10점 사이면 10)
+                            return `rgba(54, 162, 235, ${alpha})`; 
+                        },
+                        borderWidth: 1,
+                        borderColor: 'rgba(200, 200, 200, 0.5)',
+                       
+                        // 셀 크기 자동 조절
+                        width: ({chart}) => (chart.chartArea ? chart.chartArea.width / allItems.length : 0),
+                        height: ({chart}) => (chart.chartArea ? chart.chartArea.height / allUsers.length : 0)
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'category',
+                            labels: allItems, // 상품명 리스트 적용
+                            ticks: { 
+                                display: true,
+                                callback: function(value, index, ticks) {
+                                const label = this.getLabelForValue(value); // 실제 라벨 텍스트 가져오기
+                                return label.length > 5 ? label.substring(0, 5) + '...' : label; 
+                                }
+                            }
+                        },
+                        y: {
+                            type: 'category',
+                            labels: allUsers, // 유저 ID 리스트 적용
+                            offset: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const d = context.dataset.data[context.dataIndex];
+                                    return `유저: ${d.y}, 점수: ${d.v}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+    	error : function(request, status, error) 
+    	{
+        	alert("실패");
+    	}
+    });
+}
+
+</script>

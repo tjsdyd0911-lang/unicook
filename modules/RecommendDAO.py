@@ -12,9 +12,13 @@ from modules.RecommendVO import RecommendVO
 from modules.BuyVO     import BuyVO
 
 
-class RecommendDAO  :    
+class 	RecommendDAO  :    
     def GetByhit(self) :
+        """
+        비회원에 대한 상품 추천 알고리즘 구축 (메인화면)
+        """
         with DBManager() as db :
+            # 최근한달 구매수
             sql  = "select i.item_name, i.code, count(b.code) as total "
             sql += "from item i "
             sql += "left join buy b on b.code = i.code "
@@ -39,6 +43,7 @@ class RecommendDAO  :
             
             df_buy_month = pd.DataFrame(buy_month)
             
+            # 총 조회수
             sql  = "select i.code, count(b.code) as total, i.view "
             sql += "from item i "
             sql += "left join buy b on b.code = i.code "
@@ -70,14 +75,17 @@ class RecommendDAO  :
             # 가중치 점수 계산 (최근 인기템 지수)
             # 최근 한달 구매수에 더 높은 가중치(0.7)를 두고 구매 전환비(전체 구매수 / 전체 조회수 * 0.3)을 더하여 최근 인기상품을 분석함.
             df_concat['hit'] = (df_concat['total_1m'] * 0.7) + (df_concat['total_all'] / df_concat['view'] * 0.3)
-            
+
             # 인기순(hit) 내림차순 정렬
             df_concat = df_concat.sort_values(by='hit', ascending=False)
         
-            # score 테이블 삽입위한 hit 값 소수점 4자리로 정리
+            # item 테이블 삽입위한 hit 값 소수점 4자리로 정리
             df_concat['hit'] = df_concat['hit'].apply(lambda x: round(float(x), 4))
             
-            # score 테이블 hit 컬럼 수정
+            # 결측값 있는 행 모두 제거
+            df_concat = df_concat.dropna()
+
+            # item 테이블 hit 컬럼 수정
             for i in range(len(df_concat)) :
                 code = df_concat.iloc[i]["code"]
                 hit  = df_concat.iloc[i]["hit"]
@@ -136,96 +144,103 @@ class RecommendDAO  :
         return total,items
     
         
-    def MakeUserFrequency(self,userid, top_k=10, algo_type="cosine"):
-        """
-        회원에 대한 상품 추천 알고리즘 구축 (메인화면)
-        
-        현재 코드는 "해당 상품을 구매한 모든 사용자"를 대상으로 계산하고 있는데, 이는 엄밀히 말하면
-        KNN(K-Nearest Neighbors) 기반의 협업 필터링이 아닌 전체 가중 평균 방식이다.
-        
-        노이즈 제거: 나와 취향이 전혀 다른(유사도가 매우 낮은) 사람이 구매한 데이터까지 계산에 포함되면 추천의 정확도가 떨어진다.
-        계산 효율성: 모든 유저가 아닌, 유사도가 높은 상위 K명(예: 5명~20명)의 데이터만 참조함으로써 계산 속도를 높일 수 있다.
-        
-        top_k 파라미터 추가: 나랑 가장 비슷한 몇 명을 볼 것인지 정합니다. (일반적으로 5~10명이 적당합니다.)
-        """        
-        # 1. 구매내역을 DB로부터 가져오기
+    def GetByCustom(self, target_id, gender, age) :
         with DBManager() as db :
-            sql  = "select user_id,product_id,quantity "
-            sql += "from orders "        
-            count = db.Select(sql)
-            user_id    = []
-            product_id = []
-            quantity   = []
-            for i in range(0,count) :
-                user_id.append(db.GetValue(i,"user_id"))
-                product_id.append(db.GetValue(i,"product_id"))
-                quantity.append(db.GetValue(i,"quantity"))
+            max_age = (age / 10) * 10 + 9
+            min_age = (age / 10) * 10
+            sql  = "select u.id, i.item_name, u.gender, "
+            sql += "floor(u.age/10)*10 as age_group, "
+            sql += "count(b.bno) as cnt "
+            sql += "from item i "
+            sql += "join buy b on b.code = i.code "
+            sql += "join user u on b.id = u.id "
+            sql += f"where u.gender='{gender}' "
+            sql += f"and u.age between {min_age} and {max_age}"
+            sql += "group by u.id, u.gender, age_group, i.item_name "
+            print(sql)
+            filt_data = db.Select(sql)
             
-            
-            data = {
-                'user_id': user_id,
-                'product_id': product_id,
-                'quantity': quantity
-            }
-            df = pd.DataFrame(data)        
-            
-            # 2. 사용자-상품 매트릭스 생성
-            user_item_matrix = df.pivot_table(index='user_id', columns='product_id', values='quantity', fill_value=0)
-            
-            # 3. 사용자 간 코사인 유사도 계산
-            user_sim = cosine_similarity(user_item_matrix)
-            user_sim_df = pd.DataFrame(user_sim, index=user_item_matrix.index, columns=user_item_matrix.index)
-            
-            # 4. 대상 사용자와 유사한 이웃 '상위 K명' 찾기 (sim_users 활용!)
-            # 자기 자신 제외, 유사도 높은 순으로 K명 추출
-            sim_users = user_sim_df[userid].sort_values(ascending=False)[1:top_k+1]
-            top_sim_user_ids = sim_users.index # 유사한 유저들의 ID 리스트
-            
-            # 5. 추천 점수 계산 (가중 평균 방식 - 상위 K명의 데이터만 사용)
-            target_user_series = user_item_matrix.loc[userid]
-            unbought_products = target_user_series[target_user_series == 0].index
-            
-            predictions = []
-            
-            for product in unbought_products:
-                nom = 0 # 분자 (유사도 * 수량)
-                den = 0 # 분모 (유사도의 합)
+            id        = []
+            item_name = []
+            gender    = []
+            age_group = []
+            cnt       = []
+            for n in range(filt_data) :
+                id.append(db.GetValue(n,"id"))
+                item_name.append(db.GetValue(n,"item_name"))
+                gender.append(db.GetValue(n,"gender"))
+                age_group.append(db.GetValue(n,"age_group"))
+                cnt.append(db.GetValue(n,"cnt"))
                 
-                for other_user in top_sim_user_ids: # 전체 유저가 아닌 상위 K명만 순회
-                    sim = user_sim_df.loc[userid, other_user]
-                    quantity = user_item_matrix.loc[other_user, product]
-                    
-                    if quantity > 0: # 유사한 유저가 해당 상품을 구매한 경우만 반영
-                        nom += sim * quantity
-                        den += sim
-                    
-                if den > 0:
-                    score = nom / den
-                    predictions.append({
-                        'user_id': userid,
-                        'product_id': product,
-                        'score': round(float(score), 4),
-                        'algo_type': algo_type
-                    })
+            filt_data = {
+                'id'        : id,
+                'item_name' : item_name,
+                'gender'    : gender,
+                'age_group' : age_group,
+                'cnt'       : cnt
+            }
+            
+            df_filt_data = pd.DataFrame(filt_data)
         
-            ndf = pd.DataFrame(predictions).sort_values(by='score', ascending=False)
+            # --- [수정] 데이터 타입 통일: 모든 id를 문자열로 변환 ---
+            df_filt_data = df_filt_data.copy()
+            df_filt_data['id'] = df_filt_data['id'].astype(str)
             
-            #기존 추천정보 삭제
-            sql  = "delete from score "
-            sql += f"where user_id = '{userid}' and algo_type = '{algo_type}'"
-            db.RunSQL(sql)
+            target_id = str(target_id)
+            # ---------------------------------------------------------
+        
+            # 2. 성별과 나이대를 원-핫 인코딩(One-Hot Encoding)으로 변환
+            # 나이와 성별도 '유사도' 계산에 참여하게 만들기 위함입니다.
+            user_features = df_filt_data[['id', 'gender', 'age_group']].drop_duplicates().set_index('id')
+            user_features_dummy = pd.get_dummies(user_features, columns=['gender', 'age_group'])
             
-            for i in range(0,len(ndf)) :
-                product_id = ndf.iloc[i]["product_id"]
-                score = ndf.iloc[i]["score"]
-                sql  = "insert into score "
-                sql += "(user_id,product_id,score,algo_type) "
-                sql += "values "
-                sql += f"('{userid}','{product_id}','{score}','{algo_type}') "
-                #print(sql)
+            # 3. 상품 구매 이력 피벗 테이블 생성
+            item_matrix = df_filt_data.pivot_table(index='id', columns='item_name', values='cnt', fill_value=0)
+            
+            # 4. 두 데이터 결합 (구매 이력 + 유저 정보)
+            # 이렇게 하면 '구매 패턴'과 '나이/성별'이 모두 포함된 유저 벡터가 만들어집니다.
+            final_matrix = pd.concat([item_matrix, user_features_dummy], axis=1).fillna(0)
+            print(final_matrix)
+            # 유저 간 코사인 유사도 계산
+            user_sim = cosine_similarity(final_matrix)
+            user_sim_df = pd.DataFrame(user_sim, index=final_matrix.index, columns=final_matrix.index)
+            
+            # 로그인한 유저와 유사한 상위 N명 추출
+            sim_scores = user_sim_df[target_id].sort_values(ascending=False)
+            sim_users  = sim_scores.iloc[1:11].index  # 0번은 자기자신이므로 1번부터 10번까지
+           
+            # 유사한 유저 10명의 구매 데이터만 필터링
+            sim_user_interactions = item_matrix.loc[sim_users]
+            
+            # 유사도 점수를 가중치로 활용하여 상품별 점수 계산
+            rec_scores = pd.Series(dtype=float)
+            
+            for user in sim_users:
+                # 해당 유저의 유사도 점수 (가중치)
+                weight = sim_scores[user]
+                # 해당 유저의 상품별 구매 횟수에 가중치를 곱함
+                weighted_interaction = sim_user_interactions.loc[user] * weight
+                # 전체 상품 점수에 합산
+                rec_scores = rec_scores.add(weighted_interaction, fill_value=0)
+            
+            rec_scores.name = "hit"
+            
+            # item 테이블 hit 컬럼 수정
+            for item_name, hit in rec_scores.items():
+                item_name = item_name.replace("'", "''")
+                hit = round(hit, 4)
+                sql  = "update item "
+                sql += f"set hit = {hit} "
+                sql += f"where item_name = '{item_name}' "
                 db.RunSQL(sql)
-
-        return ndf
+            
+            # 점수 상위 10개 상품
+            top10_items = rec_scores.nlargest(10).index
+            
+            # sim_user_interactions에서 해당 상품 컬럼만 선택합니다.
+            sim_buy = sim_user_interactions[top10_items]
+            
+            return sim_buy
     
     def MakeItemFrequency(self,target_user_id, target_product_id, n_components=12, algo_type = "view"):
         """
@@ -620,7 +635,8 @@ class RecommendDAO  :
         
         try :
             with DBManager() as db :
-                ranking_df = pd.read_sql(sql, db.con)
+                #ranking_df = pd.read_sql(sql, db.con)
+                ranking_df = db.GetDataFrame(sql)
             now_hour = datetime.now().hour
         except Exception as e:
             print(f"데이터 분석 중 오류 발생: {e}")
@@ -651,7 +667,7 @@ class RecommendDAO  :
             return top_data.to_dict('records'), slot, slot_range
         else:
             return [], slot, slot_range
-    # 회원 시간대별 상품 분석 및 추천
+
     def GetAiRecommend(self, target_id, n_components=12, algo_type = "main") :
         
         """
@@ -689,7 +705,8 @@ class RecommendDAO  :
         try :
             with DBManager() as db :
                 
-                df = pd.read_sql(sql, db.con)
+                #df = pd.read_sql(sql, db.con)
+                df = db.GetDataFrame(sql)
                 
                 if not target_id :
                     return self.GetTimeSlotRecommend()

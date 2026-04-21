@@ -19,3 +19,21 @@ class UserDAO :
                 vo.id = db.GetValue(0,"id")
                 vo.name   = db.GetValue(0,"name")
             return vo
+        
+    def UserInfo(self, id) :
+        with DBManager() as db :
+            sql  = "select gender, age "
+            sql += "from user "
+            sql += f"where id = '{id}'"
+            info = db.Select(sql)
+            
+            gender = ""
+            age    = 0
+            for _ in range(info) :
+                gender = db.GetValue(0, "gender")
+                age    = db.GetValue(0, "age")
+            print(gender, age)
+            return gender, age
+            
+            
+            

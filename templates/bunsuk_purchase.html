@@ -130,7 +130,7 @@ function ShowChart()
                             ticks: {
                                 // value: 눈금 값, index: 눈금이 몇번째인지, ticks: 모든 눈금 객체들의 배열
                                 callback: function(value, index, ticks) {
-                                // value가 대부분 숫자로 들어오기 때문에 getLabelForValue 사용
+                                // 실제 라벨 텍스트 가져오기
                                 const label = this.getLabelForValue(value);
                                 if (label.length > 5) {
                                     return label.substring(0, 5) + '..';

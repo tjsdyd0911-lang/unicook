@@ -1,4 +1,16 @@
 {% include 'include/head.html' %}
+<script>
+function LoginCheck() {
+    if ($("#login").attr("data-login") == "") {
+        alert("로그인 후 이용하세요.");
+        
+        e.preventDefault(); 
+        return false;       
+    }
+    ShowBunsuk('mainsubY');
+}
+</script>
+<div id="login" data-login="{{session.login}}" style="display:none;"></div>
     <main class="container my-5">
        
         <!-- Section 1: 시간대별 추천 (CSV 데이터 적용) -->
@@ -53,16 +65,16 @@
         <section class="my-5 pt-4">
             <div class="d-flex gap-3"> 
         
-                <div class="analysis-banner text-center flex-fill" onclick="ShowBunsuk('mainsub')">
+                <div class="analysis-banner text-center flex-fill" onclick="ShowBunsuk('mainsubN')">
                     <i class="fa-solid fa-chart-line fs-1 mb-3"></i>
                     <h4 class="fw-bold">비회원 추천 분석</h4>
                     <p class="mb-0 opacity-75">구매내역 기반 분석</p>
                 </div>
         
-                <div class="analysis-banner text-center flex-fill" onclick="AnotherFunction()">
+                <div class="analysis-banner text-center flex-fill" onclick="LoginCheck();">
                     <i class="fa-solid fa-magnifying-glass-chart fs-1 mb-3"></i>
                     <h4 class="fw-bold">회원 추천 분석</h4>
-                    <p class="mb-0 opacity-75">???</p>
+                    <p class="mb-0 opacity-75">유사한 회원 기반 분석</p>
                 </div>
         
             </div>

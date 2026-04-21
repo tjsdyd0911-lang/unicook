@@ -29,7 +29,7 @@ def add_header():
 def main() :
     
     login_info = session.get("login")
-    id = login_info.get("id") if login_info else None
+    id     = login_info.get("id") if login_info else None
     
     time_dao  = RecommendDAO()
     time_data, slot, slot_range = time_dao.GetAiRecommend(id)
@@ -37,10 +37,14 @@ def main() :
     current_page = request.args.get('page', 1, type=int)
     category = request.args.get("category", "0")
     
-    # 최근 1달 인기상품 분석
-    re_dao = RecommendDAO()
-    re_dao.GetByhit()
-    
+    if id :
+        re_dao = RecommendDAO()
+        re_dao.GetByCustom(id)
+    else :    
+        # 최근 1달 인기상품 분석
+        re_dao = RecommendDAO()
+        re_dao.GetByhit()
+        
     # 리스트 가져오기 실행
     item_dao = ItemDAO()
     total, items = item_dao.GetList(current_page, category)
@@ -366,17 +370,33 @@ def mixed() :
     ]
     return jsonify(dict_list)
 
-# 메인하단 분석 시각화
+# 메인하단 분석 시각화(비회원)
 @app.route("/bubble.do")
 def bubble():
     dao = RecommendDAO()
     df_chart = dao.GetByhit()
     
-    # 가중치 점수 상위 10개만 추출
+    # 가중치 점수 상위 6개만 추출
     top = df_chart.sort_values('hit', ascending=False).head(6)
     
     # 데이터프레임 -> 딕셔너리 변환
     chart_data = top.to_dict(orient='records')
+    
+    return jsonify(chart_data)
+
+# 메인하단 분석 시각화(회원)
+@app.route("/heatmap.do")
+def heatmap():
+    id = session["login"]["id"] 
+    
+    dao = RecommendDAO()
+    sim_buy = dao.GetByCustom(id)
+    print(sim_buy)
+    
+    
+    # 데이터프레임 -> 딕셔너리 변환
+    chart_data = sim_buy.reset_index().to_dict(orient='records')
+    print(chart_data)
     
     return jsonify(chart_data)
 

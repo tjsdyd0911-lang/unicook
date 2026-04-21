@@ -68,18 +68,16 @@
                     <span class="text-warning">★</span> 함께하면 더 맛있는 추천 음식
                 </h4>
             </div>
-            <div class="row g-4 text-center">
-                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/637e7895-af69-4df5-b6d8-a46d253b5937.jpg"><div class="product-name">[부산 이가네] 이가네 떡볶이</div><div class="product-price">7,490원</div></div></a></div>
-                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/product/image/9b9f29f3-e4c2-476d-b797-95358008318f.jpg"><div class="product-name">[BBQ] 후라이드 치킨</div><div class="product-price">9,900원</div></div></a></div>
-                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/989d0b2f-63fb-457f-a33d-e5b82b39ccf2.jpg"><div class="product-name">[차려낸] 새우볶음밥 (4개입)</div><div class="product-price">9,800원</div></div></a></div>
-                 <div class="col-6 col-md-3"><a href="view.do"><div class="product-card"><img src="https://product-image.kurly.com/hdims/resize/%5E%3E720x%3E936/cropcenter/720x936/quality/85/src/product/image/a0e5af45-0c1a-4cc3-a793-95481b5b70e0.jpg"><div class="product-name">[온더고] 간편 미식 덮밥 도시락</div><div class="product-price">5,500원</div></div></a></div>
+            <div class="row g-4 text-center" id="reco_items">
+                {% for item in reco_items %}
+                    <div class="col-6 col-md-3"><a href="/view.do?code={{item.code}}"><div class="product-card"><img src="{{item.image}}"><div class="product-name">{{item.item_name}}</div><div class="product-price">{{item.price}}</div></div></a></div>
+                {% endfor %}
             </div>
-        </section>
-        <section class="my-5 pt-4">
+            <br>
             <div class="analysis-banner text-center" onclick="ShowBunsuk('view')">
                 <i class="fa-solid fa-chart-line fs-1 mb-3"></i>
-                <h4 class="fw-bold">나의 식단 분석 리포트 확인하기</h4>
-                <p class="mb-0 opacity-75">클릭하여 회원님께 딱 맞는 맞춤 상품 리포트를 확인해 보세요.</p>
+                <h4 class="fw-bold">연관 상품 분석 확인하기</h4>
+                <p class="mb-0 opacity-75">클릭하면 상단에 추천 상품이 나옵니다.</p>
             </div>
         </section>
     <!-- Bootstrap 5 Bundle JS -->

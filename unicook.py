@@ -124,9 +124,19 @@ def view() :
     code = request.args.get("code","")
     if code == "":
         return redirect("/")
+
+    login_info = session.get("login")
+    user_id = login_info.get("id") if login_info else None
+    print(user_id)
+    
     dao = ItemDAO()
     item = dao.View(code)
-    return render_template("view.html", item=item)
+    
+    dao = RecommendDAO()
+    reco_items = dao.RecommendItem(user_id, "best")
+    ndf = dao.MakeItemFrequency(user_id, code)
+    
+    return render_template("view.html", item=item, reco_items=reco_items, ndf=ndf)
 
 @app.route("/cart.do")
 def cart() :
@@ -336,6 +346,17 @@ def bunsuk(target = None) :
                                    total  = total,
                                    items  = items
                                    )
+ 
+    if target == "view" :
+        buy_dao = RecommendDAO()
+        buy_dao.MakePersonalBestRecommendations(id, algo_type = "best")
+        total,items = buy_dao.GetByUserFrequency(id, n=4, algo_type = "best")
+        if int(total) > 0 :
+            return render_template("/bunsuk_view.html",
+                                   target = target,
+                                   total  = total,
+                                   items  = items
+                                   )
     
     #return render_template(f"bunsuk_{target}.html",target = target)
 
@@ -376,7 +397,6 @@ def recommend() :
         return jsonify(reco_dict)
     
     return jsonify(reco_dict)
-
     
 
 # 구매내역 분석 시각화

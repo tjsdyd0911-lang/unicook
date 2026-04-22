@@ -1,4 +1,7 @@
 import math
+import json
+import logging
+import MySQLdb
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -12,6 +15,8 @@ from modules.ItemDAO import ItemDAO
 from modules.CartDAO import CartDAO
 from modules.BuyDAO  import BuyDAO
 from modules.RecommendDAO import RecommendDAO
+from modules.DBManager import LoadDbConfig
+
 
 app = Flask(__name__)
 
@@ -490,4 +495,26 @@ def info() :
     
 # main 함수
 if __name__ == "__main__" :
+    try :
+        # 데이터베이스에 연결할 JSON 파일 로드
+        db_config = LoadDbConfig()
+        
+        # 데이터베이스에 연결되는지 미리 확인
+        conn = MySQLdb.connect(**db_config)
+        conn.close()
+        
+    except FileNotFoundError :
+        print("에러 : config.json 파일을 찾을 수 없습니다. 설정 파일을 확인해주세요.")
+        exit(1)
+    except json.JSONDecodeError : 
+        print("에러 : 파일 형식이 올바르지 않습니다.")
+        exit(1)
+    except KeyError as e :
+        # 내부용 에러 메시지 
+        logging.error(f"설정 파일 오류: {e} 키를 찾을 수 없음")
+        # 사용자 표시용 에러 메시지
+        print("에러 : 시스템 설정 오류가 발생했습니다. 관리자에게 문의하세요.")
+        exit(1)
+    except MySQLdb.OperationalError :
+        print("데이터베이스 접속 정보가 올바르지 않습니다. (비밀번호나 주소 확인)")
     app.run(port=8000)

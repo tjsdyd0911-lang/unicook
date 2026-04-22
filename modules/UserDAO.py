@@ -32,7 +32,6 @@ class UserDAO :
             for _ in range(info) :
                 gender = db.GetValue(0, "gender")
                 age    = db.GetValue(0, "age")
-            print(gender, age)
             return gender, age
             
             

@@ -4,8 +4,16 @@ pip install mysqlclient
 """
 import MySQLdb  # pymysql 대신 MySQLdb를 사용합니다.
 import pandas as pd
-import pymysql
-import pandas as pd
+import json
+import os
+
+def LoadDbConfig() :
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    CONFIG_PATH = os.path.join(BASE_DIR, "..", "config.json")
+    
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f :
+        config = json.load(f)
+    return config["database"]
 
 class DBManager:
     def __init__(self):
@@ -16,14 +24,9 @@ class DBManager:
     # DB연결
     def __enter__(self):
         try: 
+            db_config = LoadDbConfig()
             # MySQLdb.connect를 사용하며, charset 옵션은 utf8mb4를 권장합니다.
-            self.con = MySQLdb.connect(
-                host="192.168.0.35",
-                user="unicook",
-                password="cook",
-                db="unicook",
-                charset="utf8"
-            )
+            self.con = MySQLdb.connect(**db_config)
             return self
 
         except Exception as e:
@@ -93,5 +96,4 @@ class DBManager:
         
         # 3. 데이터를 기반으로 DataFrame 생성
         df = pd.DataFrame(self.data, columns=columns)
-        print(df.head())
         return df

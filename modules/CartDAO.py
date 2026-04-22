@@ -54,7 +54,6 @@ class CartDAO :
         with DBManager() as db :
             
             placeholders = ', '.join(['%s'] * len(cnos))
-            print(placeholders)
             sql = f"DELETE FROM cart WHERE cno IN ({placeholders})"
             
             cursor = db.con.cursor()

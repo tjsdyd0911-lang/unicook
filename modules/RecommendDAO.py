@@ -157,7 +157,6 @@ class 	RecommendDAO  :
             sql += f"where u.gender='{gender}' "
             sql += f"and u.age between {min_age} and {max_age}"
             sql += "group by u.id, u.gender, age_group, i.item_name "
-            print(sql)
             filt_data = db.Select(sql)
             
             id        = []
@@ -200,7 +199,6 @@ class 	RecommendDAO  :
             # 4. 두 데이터 결합 (구매 이력 + 유저 정보)
             # 이렇게 하면 '구매 패턴'과 '나이/성별'이 모두 포함된 유저 벡터가 만들어집니다.
             final_matrix = pd.concat([item_matrix, user_features_dummy], axis=1).fillna(0)
-            print(final_matrix)
             # 유저 간 코사인 유사도 계산
             user_sim = cosine_similarity(final_matrix)
             user_sim_df = pd.DataFrame(user_sim, index=final_matrix.index, columns=final_matrix.index)
@@ -338,7 +336,6 @@ class 	RecommendDAO  :
                 sql += "(user_id,product_id,score,algo_type) "
                 sql += "values "
                 sql += f"('{target_user_id}','{product_id}','{score}','{algo_type}') "
-                #print(sql)
                 db.RunSQL(sql)       
         
         return ndf
@@ -461,7 +458,6 @@ class 	RecommendDAO  :
                 sql += "(user_id,product_id,score,algo_type) "
                 sql += "values "
                 sql += f"('{target_user_id}','{product_id}','{score}','{algo_type}') "
-                #print(sql)
                 db.RunSQL(sql) 
             
         return ndf
@@ -561,18 +557,9 @@ class 	RecommendDAO  :
                 sql += "(id,code,score,algo_type) "
                 sql += "values "
                 sql += f"('{target_user_id}','{code}','{score}','{algo_type}') "
-                #print(sql)
                 db.RunSQL(sql)         
         
         return ndf
-
-    def UpdateRecommand(self,userid) :
-        """
-        상품 추천 알고리즘을 업데이트한다.
-        """
-        print(f"{userid}를 위한 상품 추천 정보 갱신 시작 =================")
-        self.MakeUserFrequency(userid,top_k=10, algo_type="main")
-        print(f"{userid}를 위한 상품 추천 정보 갱신 종료 =================")
 
     def RecommendItem(self, userid, algo_type) :
         item = []
@@ -711,6 +698,7 @@ class 	RecommendDAO  :
                     return self.GetTimeSlotRecommend()
                     
                 df["code"] = df["code"].astype(str)
+                df["qty"] = df["qty"].astype(float)
                 # 구매 건수 + 구매 수량(구매 수량은 로그화 시켜 한명이 대량 구매한 부분을 모두 반영하지 않음)
                 df["pref_score"] = df["count"] + np.log1p(df["qty"])
 

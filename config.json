@@ -1,0 +1,9 @@
+{
+    "database": {
+        "host": "192.168.0.35",
+        "user": "unicook",
+        "password": "cook",
+        "port": 3306,
+        "database": "unicook"
+    }
+}

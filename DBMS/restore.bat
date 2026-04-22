@@ -1,0 +1,1 @@
+mysql -u unicook -p unicook < unicook.bak

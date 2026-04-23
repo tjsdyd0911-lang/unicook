@@ -917,6 +917,9 @@ class 	RecommendDAO  :
     def ViewAiRecommend(self, target_id, current_code, top_k = 19, algo_type = "view") :
         """
         제품 상세 페이지
+        모든 사용자에 대한 구매내역을 바탕으로 유사도 계산
+        상품간 코사인 유사도를 계산하여 화면에 출력
+        현재 기준 상품 포함 20개의 상품군 비교 및 유사도 출력
         """
         with DBManager() as db :
             sql  = "select id, code, qty from buy"

@@ -309,7 +309,7 @@ def purchaseadd():
 def bunsuk(target = None) :
     
     login_info = session.get("login")
-    id = login_info.get("id") if login_info else None
+    id = login_info.get("id") if login_info else "guest"
     check_id = True if id else False
     
     if not target :
@@ -356,12 +356,10 @@ def bunsuk(target = None) :
     if target == "view" :
         code = int(request.args.get("code", 0))
         view_dao = RecommendDAO()
-        if login_info :
-            result = view_dao.ViewAiRecommend(id, code, top_k = 19, algo_type = "view")
-            chart_data = result["chart_data"]
-            min_val    = result["min_val"]
-        else :
-            view_dao.GetTimeSlotRecommend()
+        id if id else "guest"
+        result = view_dao.ViewAiRecommend(id, code, top_k = 19, algo_type = "view")
+        chart_data = result["chart_data"]
+        min_val    = result["min_val"]
         total,items = view_dao.GetByUserFrequency(id, n=19, algo_type = "view")
         if int(total) > 0 :
             return render_template("/bunsuk_view.html",
@@ -378,10 +376,8 @@ def bunsuk(target = None) :
 @app.route("/recommend.do")
 def recommend() :
     # 로그인 여부 확인
-    if "login" not in session or session["login"] is None:
-        return redirect("/login.do")
-    
-    id = session["login"]["id"]
+    login_info = session.get("login")
+    id = login_info.get("id") if login_info else "guest"
     
     target = request.args.get("target", "main")
 
@@ -413,6 +409,7 @@ def recommend() :
     
     if target == "view" :
         code = request.args.get("code", 0)
+        
         reco_items = dao.RecommendItem(id, "view")
         reco_dict = [
             {

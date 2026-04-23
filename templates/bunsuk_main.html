@@ -1,6 +1,4 @@
 <!----------- main ----------->
-{% if target == "main" %}
-
 <!-- [Modal] 분석 리포트 팝업 -->
 <div class="modal fade" id="analysisModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -178,64 +176,3 @@ $(document).ready(function() {
     });
 });
 </script>
-    <!--
-    <script>
-    var chartInstance = null;
-    ShowChart();
-    
-    function ShowChart()
-    {
-            // 1. 데이터 정의 (아까 말씀하신 카테고리 매핑 활용)
-            const ctx = document.getElementById('myPieChart').getContext('2d');
-            
-            const data = {
-                labels: ['한식', '중식', '양식', '일식'], // 범례 이름
-                datasets: [{
-                    label: '음식점 수',
-                    data: [12, 19, 7, 5], // 실제 데이터 값
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.6)',  // 한식 (빨강)
-                        'rgba(54, 162, 235, 0.6)', // 중식 (파랑)
-                        'rgba(255, 206, 86, 0.6)', // 양식 (노랑)
-                        'rgba(75, 192, 192, 0.6)'  // 일식 (초록)
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            };
-    
-            // 2. 차트 생성
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, 
-            {
-                type: 'pie', // 차트 종류: 파이
-                data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top', // 범례 위치
-                        },
-                        title: {
-                            display: true,
-                            text: '우리 동네 맛집 분포'
-                        }
-                    }
-                }
-            });
-        }
-    </script>
-    -->
-{% endif %}
-
-
-
-
-
-
-

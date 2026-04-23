@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['static\\js\\unicook.js', 'modules\\RecommendDAO.py', 'unicook.py', 'templates\\view.html', 'templates\\bunsuk_view.html', 'templates\\include\\head.html']
+recent_files = ['static\\js\\unicook.js', 'modules\\RecommendDAO.py', 'unicook.py', 'templates\\bunsuk_main.html', 'templates\\main.html', 'templates\\purchase.html', 'templates\\bunsuk_purchase.html']
 
 [main]
 version = 0.2.0

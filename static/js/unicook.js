@@ -153,7 +153,7 @@ function ShowItem(target)
             sendData.code = code;
         }
     }
-
+    
     $.ajax({
     	url : "/recommend.do",
     	type : "get",

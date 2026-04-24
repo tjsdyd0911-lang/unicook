@@ -386,7 +386,7 @@ def recommend() :
     target = request.args.get("target", "main")
 
     dao = RecommendDAO()
-
+    
     if target == "purchase" :
         reco_items = dao.RecommendItem(id, "best")
         reco_dict = [

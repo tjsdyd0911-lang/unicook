@@ -18,7 +18,16 @@
     <link rel="stylesheet" href="/static/css/unicook.css">
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <script>
+          // 메시지 리스트 중 첫 번째 메시지를 알럿으로 띄움
+          alert("{{ messages[0] }}");
+        </script>
+      {% endif %}
+    {% endwith %} 
     <script>
+        
         $(document).ready(function()
         {
             $("#purchaseBtn").click(function(){
@@ -47,8 +56,6 @@
                     alert("오류가 발생했습니다.");
                 });
         }
-        
-        
         
     </script>
 <!-- Header -->

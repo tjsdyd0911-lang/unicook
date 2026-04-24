@@ -370,6 +370,7 @@ function deleteCartItems(cnos)
                     const total = $(".item-checkbox").length;
                     const checked = $(".item-checkbox:checked").length;
                     $("#selectAll").prop("checked", total > 0 && total === checked);
+                    ShowItem("cart");
                 });
             } else {
                 alert("삭제 중 오류가 발생했습니다.");
@@ -455,6 +456,21 @@ $(document).on("change", "#selectAll", function() {
     setTimeout(updateFinalTotal, 10);
 });
 
+// 구매내역 필터
+$(document).ready(function() {
+    $(".filter-btn").on("click", function() {
+        // 클릭한 버튼 -> active 클래스 추가, 나머지는 제거
+        $(".filter-btn").removeClass("active");
+        $(this).addClass("active");
+
+        // 선택된 기간 값 -> all(전체), 1m(1달), 3m(3달)
+        const period = $(this).data("period");
+
+        // 페이징
+        location.href = "/purchase.do?page=1&period=" + period;
+    });
+});
+
 // 검색&카테고리 목록부분
 let currentCategory = 0
 let categoryTitle   = ""
@@ -475,22 +491,9 @@ function selectCategory(element)
 
 // 페이지 번호 클릭 시
 function changePage(page) {
-    loadItems(currentCategory, page);
+    loadItems(currentCategory, page, keyword);
 }
 
-$(document).ready(function() {
-    $(".filter-btn").on("click", function() {
-        // 클릭한 버튼 -> active 클래스 추가, 나머지는 제거
-        $(".filter-btn").removeClass("active");
-        $(this).addClass("active");
-
-        // 선택된 기간 값 -> all(전체), 1m(1달), 3m(3달)
-        const period = $(this).data("period");
-
-        // 페이징
-        location.href = "/purchase.do?page=1&period=" + period;
-    });
-});
 
 // 검색 시
 function searchKeyword() {

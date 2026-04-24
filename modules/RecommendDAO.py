@@ -562,6 +562,7 @@ class 	RecommendDAO  :
         return ndf
 
     def RecommendItem(self, userid, algo_type) :
+        print("params :" , userid, algo_type)
         item = []
         with DBManager() as db :
             conditions = []
@@ -578,8 +579,10 @@ class 	RecommendDAO  :
             if conditions :
                 sql += "where " + " AND ".join(conditions)
             sql += " order by score desc "
+            print(sql)
             
             count = db.Select(sql, params)
+            print(count)
             for n in range(count) :
                 vo = RecommendVO()
                 vo.code      = db.GetValue(n, "code")

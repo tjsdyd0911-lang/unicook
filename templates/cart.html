@@ -14,29 +14,31 @@
                         </div>
                         <button id="deleteSelectedBtn" class="btn btn-sm btn-outline-danger border-0" onclick="deleteSelectItems()">선택삭제</button>
                     </div>
-                    <!-- 상품 아이템 -->
-                    {% for item in cart_list %}
-                        <div class="cart-item-container d-flex align-items-start mb-4 position-relative" data-cno="{{item.cno}}" data-price="{{item.price_num}}">
-                            <input id="item-code" type="hidden" type="text" value="{{item.code}}">
-                            <div class="form-check mt-3 me-3">
-                                <input class="form-check-input item-checkbox" type="checkbox" checked>
-                            </div>
-                            <div class="product-img me-3">
-                                <img src="{{item.image}}" class="img-fluid rounded-4 shadow-sm custom-product-img">
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">{{item.item_name}}</h6>
-                                <div class="text-danger fw-bold mb-2">{{item.price}}</div>
-                                <!-- 수량 조절 -->
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="qty-btn" onclick="QtyMinus(this);"><i class="fa-solid fa-minus fa-xs"></i></button>
-                                    <span class="px-2 qtyCount">{{item.qty}}</span>
-                                    <button class="qty-btn" onclick="QtyPlus(this);"><i class="fa-solid fa-plus fa-xs"></i></button>
+                    <div id="items">
+                        <!-- 상품 아이템 -->
+                        {% for item in cart_list %}
+                            <div class="cart-item-container d-flex align-items-start mb-4 position-relative" data-cno="{{item.cno}}" data-price="{{item.price_num}}">
+                                <input id="item-code" type="hidden" type="text" value="{{item.code}}">
+                                <div class="form-check mt-3 me-3">
+                                    <input class="form-check-input item-checkbox" type="checkbox" checked>
                                 </div>
+                                <div class="product-img me-3">
+                                    <img src="{{item.image}}" class="img-fluid rounded-4 shadow-sm custom-product-img">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1">{{item.item_name}}</h6>
+                                    <div class="text-danger fw-bold mb-2">{{item.price}}</div>
+                                    <!-- 수량 조절 -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="qty-btn" onclick="QtyMinus(this);"><i class="fa-solid fa-minus fa-xs"></i></button>
+                                        <span class="px-2 qtyCount">{{item.qty}}</span>
+                                        <button class="qty-btn" onclick="QtyPlus(this);"><i class="fa-solid fa-plus fa-xs"></i></button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm text-muted position-absolute top-0 end-0" onclick="deleteItemOne(this, {{item.cno}})"><i class="fa-solid fa-xmark fs-5"></i></button>
                             </div>
-                            <button class="btn btn-sm text-muted position-absolute top-0 end-0" onclick="deleteItemOne(this, {{item.cno}})"><i class="fa-solid fa-xmark fs-5"></i></button>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
                 <br>
                <!-- Section 2: 메인 상품 리스트 -->
@@ -49,7 +51,7 @@
                
                <!-- 분석 리포트 작성 부분 (Modal Trigger 배너) -->
                <section class="my-5 pt-4">
-                   <div class="analysis-banner text-center"  onclick="ShowBunsuk('cart')">
+                   <div class="analysis-banner text-center"  onclick="bunsuk();">
                        <i class="fa-solid fa-chart-line fs-1 mb-3"></i>
                        <h4 class="fw-bold">나의 식단 분석 리포트 확인하기</h4>
                        <p class="mb-0 opacity-75">클릭하여 회원님께 딱 맞는 맞춤 상품 리포트를 확인해 보세요.</p>
@@ -97,6 +99,14 @@
         window.onload = function()
         {
             ShowItem("cart");
+        }
+        
+        function bunsuk() {
+            if ($("#items .cart-item-container").length === 0) {
+                alert("장바구니가 비어있습니다.")
+                return false;
+            }
+            ShowBunsuk('cart');
         }
     </script>
     <!-- Bootstrap 5 Bundle JS -->

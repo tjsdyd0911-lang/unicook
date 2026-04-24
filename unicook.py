@@ -387,7 +387,7 @@ def recommend() :
     target = request.args.get("target", "main")
 
     dao = RecommendDAO()
-
+    
     if target == "purchase" :
         reco_items = dao.RecommendItem(id, "best")
         reco_dict = [
@@ -401,7 +401,7 @@ def recommend() :
         return jsonify(reco_dict)
         
     if target == "cart" :
-        print(target)
+        dao.CartAiRecommend(id, algo_type = "cart")
         reco_items = dao.RecommendItem(id, "cart")
         reco_dict = [
             {

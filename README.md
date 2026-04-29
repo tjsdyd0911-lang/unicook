@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./images/unicook_main.png" width="80%">
-  <h3>AI를 활용한 개인 맞춤형 추천 상품</h3>
+  <h3>AI를 활용한 개인 맞춤형 상품 추천</h3>
 </div>
 
 ## ⌨️ 기간
